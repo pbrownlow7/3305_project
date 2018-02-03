@@ -8,7 +8,7 @@
     width:700px;
     height:700px;
   }
-  
+
   table{
     border-collapse: collapse;
     width:700px;
@@ -19,14 +19,6 @@
   #sq{
     border: none;
     width: 53.6px;
-    padding: 0px;
-    margin: 0px;
-  }
-  
-  #edge{
-    border: none;
-    height: 90px !important;
-    width: 90px !important;
     padding: 0px;
     margin: 0px;
   }
@@ -41,25 +33,27 @@
     justify-content:center;
     background-color: #ddf4df;
   }
-  
+
   table {
-    border: 4px solid black;
+    table-layout: fixed;
+    border: 1px solid white;
     text-align: center;
     table-layout:fixed;
     border-collapse: collapse;
     width:700px;
     height:700px;
   }
-  
+
   #board {
       background-image: url('images/Board.jpg');
       background-size: 700px 700px;
+
   }
 
     .edge {
         border: none;
-        height: 93px !important;
-        width: 93px !important;
+        height: 94px !important;
+        width: 95px !important;
         padding: 0px;
         margin: 0px;
     }
@@ -67,3 +61,41 @@
       width: 20px;
       height:20px;
     }
+    /*td{
+      border: 1px solid white;
+    }
+   .right{
+      height: 56.85px;
+      width: 25px;
+      background-color: black;
+    }
+
+    .left{
+      height: 56.5px;
+      width: 25px;
+      background-color: black;
+      float: right;
+    }
+    .top{
+      height: 25px;
+      width: 56.5px;
+      background-color: black;
+
+    }
+    .bottom{
+      height: 25px;
+      width: 56.5px;
+      background-color: black;
+      position: static;
+
+    }
+
+    .hor{
+      width: 94px;
+      height:56px;
+    }
+    .ver{
+      width: 52px;
+      height:89px;
+    }
+*/
