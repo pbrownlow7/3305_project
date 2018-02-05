@@ -20,7 +20,7 @@ Queue.prototype.peak = function(){
 
 //For in auction when player has bid
 //Keeps the player in the queue but moves them to the end
-Queue.prototype.endTurn = function(){
+Queue.prototype.endTurn = function(elt){
     var elt = this.queue.dequeue();
     return this.queue.enqueue(elt);
 }
