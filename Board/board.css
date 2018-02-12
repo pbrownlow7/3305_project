@@ -109,3 +109,10 @@
       width: 150px;
       border: 2px solid black;
     }
+
+    #buyOrAuction {
+      visibility: hidden; 
+      height: 75px;
+      width: 150px;
+      border: 2px solid black;
+    }

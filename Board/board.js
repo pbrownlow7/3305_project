@@ -1,5 +1,358 @@
 (function (){
 
+    //The properties array
+    var properties = {
+        //IDs not included: 0000, 0010, 1010, 1000, 0007, 1008, 0400, 0002, 0710, 0700
+        "0001": {
+            colour = brown,
+            price = 60,
+            name = "holderName",
+            rent = {
+                0: 2,
+                1: 4 
+                //try and find formula
+            },
+            owner = null
+        }
+    };
+    /*var properties = {{Name:"Mediterranean Ave.",
+                   Type:"Normal",
+                   Position:2,
+                   Price:60,
+                   Colour:"brown",
+                   Rent:2,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Baltic Ave.",
+                   Type:"Normal",
+                   Position:4,
+                   Price:60,
+                   Colour:"brown",
+                   Rent:4,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Oriental Ave.",
+                   Type:"Normal",
+                   Position:6,
+                   Price:100,
+                   Colour:"light-blue",
+                   Rent:6,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Vermont Ave.",
+                   Type:"Normal",
+                   Position:9,
+                   Price:100,
+                   Colour:"light-blue",
+                   Rent:6,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Connecticut Ave.",
+                   Type:"Normal",
+                   Position:10,
+                   Price:120,
+                   Colour:"light-blue",
+                   Rent:8,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"St.Charles Place",
+                   Type:"Normal",
+                   Position:12,
+                   Price:140,
+                   Colour:"pink",
+                   Rent:10,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"States Ave.",
+                   Type:"Normal",
+                   Position:14,
+                   Price:140,
+                   Colour:"pink",
+                   Rent:10,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Virgina Ave.",
+                   Type:"Normal",
+                   Position:14,
+                   Price:160,
+                   Colour:"pink",
+                   Rent:12,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"St.James Place",
+                   Type:"Normal",
+                   Position:17,
+                   Price:180,
+                   Colour:"orange",
+                   Rent:14,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Tennessee Ave.",
+                   Type:"Normal",
+                   Position:19,
+                   Price:180,
+                   Colour:"orange",
+                   Rent:14,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"New York Ave.",
+                   Type:"Normal",
+                   Position:20,
+                   Price:200,
+                   Colour:"orange",
+                   Rent:16,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Kentucky Ave.",
+                   Type:"Normal",
+                   Position:22,
+                   Price:220,
+                   Colour:"red",
+                   Rent:18,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Indiana Ave.",
+                   Type:"Normal",
+                   Position:24,
+                   Price:220,
+                   Colour:"red",
+                   Rent:18,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Illinois Ave.",
+                   Type:"Normal",
+                   Position:25,
+                   Price:240,
+                   Colour:"red",
+                   Rent:20,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Atlantic Ave.",
+                   Type:"Normal",
+                   Position:27,
+                   Price:260,
+                   Colour:"yellow",
+                   Rent:22,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Ventor Ave.",
+                   Type:"Normal",
+                   Position:28,
+                   Price:260,
+                   Colour:"yellow",
+                   Rent:22,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Marvin Gardens",
+                   Type:"Normal",
+                   Position:30,
+                   Price:280,
+                   Colour:"yellow",
+                   Rent:24,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Pacific Ave.",
+                   Type:"Normal",
+                   Position:32,
+                   Price:300,
+                   Colour:"green",
+                   Rent:26,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"North Carolina Ave.",
+                   Type:"Normal",
+                   Position:33,
+                   Price:300,
+                   Colour:"green",
+                   Rent:26,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Pennsylvania Ave.",
+                   Type:"Normal",
+                   Position:35,
+                   Price:320,
+                   Colour:"green",
+                   Rent:28,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Park Place",
+                   Type:"Normal",
+                   Position:38,
+                   Price:350,
+                   Colour:"dark-blue",
+                   Rent:35,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Boardwalk",
+                   Type:"Normal",
+                   Position:40,
+                   Price:400,
+                   Colour:"dark-blue",
+                   Rent:50,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Electric Company",
+                   Type:"Utility",
+                   Position:13,
+                   Price:150,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Waterwork",
+                   Type:"Utility",
+                   Position:29,
+                   Price:150,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Reading Railroad",
+                   Type:"Railroad",
+                   Position:6,
+                   Price:200,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Pennsylvania Railroad",
+                   Type:"Railroad",
+                   Position:16,
+                   Price:200,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"B&O Railroad",
+                   Type:"Railroad",
+                   Position:26,
+                   Price:200,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                  {Name:"Short Line Railroad",
+                   Type:"Railroad",
+                   Position:36,
+                   Price:200,
+                   Events: ["buy", "trade"],
+                   Rent_Due: false,
+                   Owner:null},
+
+                   {Name:"Go",
+                   Type:"Other",
+                   Position:1,
+                   Events: ["collect"],
+                   First_Move : true;
+                   },
+
+                   {Name:"Income Tax",
+                   Type:"Other",
+                   Position:5,
+                   Events: ["fine"],
+                   },
+
+                   {Name:"Luxury Tax",
+                   Type:"Other",
+                   Position:39,
+                   Events: ["fine"],
+                   },
+
+                   {Name:"Community Chest1",
+                   Type:"Community Chest",
+                   Position:3,
+                   Events: ["drawCard"],
+                   },
+
+                   {Name:"Community Chest2",
+                   Type:"Community Chest",
+                   Position:18,
+                   Events: ["drawCard"],
+                   },
+
+                   {Name:"Community Chest3",
+                   Type:"Community Chest",
+                   Position:34,
+                   Events: ["drawCard"],
+                   },
+
+                   {Name:"Chance1",
+                   Type:"Chance",
+                   Position:8,
+                   Events: ["drawCard"],
+                   },
+
+                   {Name:"Chance2",
+                   Type:"Chance",
+                   Position:23,
+                   Events: ["drawCard"],
+                   },
+
+                   {Name:"Chance3",
+                   Type:"Chance",
+                   Position:37,
+                   Events: ["drawCard"],
+                   },
+
+                  {Name:"Go to Jail",
+                   Type:"Jail",
+                   Position:31,
+                   Events: ["jail"],
+                   },
+
+                   //two tiles in one
+                   {Name:"Just Visiting/Jail",
+                   Type:"Jail",
+                   Position:11,
+                   Events: ["jail", "visit"],
+                   }
+
+    }*/
+
     var players = []; //Where all the player info is stored
     var turn = 0; //Whose turn it is, based on their position in the players array
     var currentRoll;
@@ -10,8 +363,11 @@
 
     
     var rollButton;
-    /*
+    
     //;;;Can be deleted
+    
+    var bankruptPlayerButton;
+    var bankrupt = false;
     var rollEven = false;
     var rollOdd = false;
     var rollDouble = false;
@@ -20,7 +376,8 @@
     var oddRollButton;
     var doubleRollPressed;
     //;;;//
-    */
+    
+    
     var useJailCardButton;
     var dontUseJailCardButton;
     var payFineButton;
@@ -35,32 +392,41 @@
         $("#player1").fadeOut();
         $("#player1").fadeIn();
         rollButton = document.getElementById("temp");
-        /*
+        
+        bankruptPlayerButton = document.getElementById("bankruptButton");
         //;;;Can be deleted
         giveJailCardButton = document.getElementById("temp1");
         evenRollButton = document.getElementById("temp2");
         oddRollButton = document.getElementById("temp3");
         doubleRollButton = document.getElementById("temp4");
         //;;;//
-        */
+        
         useJailCardButton = document.getElementById("jYes");//...change HTML part as well
         dontUseJailCardButton = document.getElementById("jNo");
         payFineButton = document.getElementById("fine");
         attemptDoubleButton = document.getElementById("rd");
         rollButton.addEventListener("click", normalRoll, false);
-        /*
+        
+        bankruptPlayerButton.addEventListener("click", bankruptPlayerClicked, false);
         //;;;Can be deleted
         giveJailCardButton.addEventListener("click", giveJailCardPressed, false);
         evenRollButton.addEventListener("click", evenRollPressed, false);
         oddRollButton.addEventListener("click", oddRollPressed, false);
         doubleRollButton.addEventListener("click", doubleRollPressed, false);
         //;;;//
-        */
+        
         useJailCardButton.addEventListener("click", useJailCardClicked, false);
         dontUseJailCardButton.addEventListener("click", dontUseJailCardClicked, false);
         payFineButton.addEventListener("click", payFineClicked, false);
         attemptDoubleButton.addEventListener("click", attemptDoubleClicked, false);
     }
+
+    
+    //;;;
+    function bankruptPlayerClicked() {
+        bankrupt = true;
+    }
+    
 
     async function diceFadeIn(num1, num2) {
         document.getElementById("temp").disabled = true;
@@ -146,14 +512,14 @@
         diceRolled();
     }
 
-    /*
+    
     //;;;
     function giveJailCardPressed() {
         for(var i = 0; i < 4; i++) {
             players[i].jailCard = true;
         }
     }
-
+    
     function evenRollPressed() {
         rollEven = true;
         var even = rollDice();
@@ -174,7 +540,7 @@
         currentRoll = doub[0] + doub[1];
         diceRolled();
     }
-    */
+     
 
     async function diceRolled() {
         if(players[turn].jail.justReleased) {
@@ -213,6 +579,11 @@
         //shown without them having to click anything
         if(players[turn].jail.jailTag) {
             checkForJailCard();
+        } else {
+            /*
+            * Put a timer here maybe for the length of time theplayer has to roll until
+            * it automatically does it for them
+            */
         }
     }
 
@@ -236,6 +607,9 @@
             }
             //Getting the player's new position back into the "xxxx" format
             newPosition = positionHack(left, right);
+            if(newPosition == "0000") {
+                console.log("Player has passed go; collect 200");
+            }
             spacesToMove--;
             //Placing the player's icon on the new tile
             document.getElementById(newPosition).appendChild(playr);
@@ -252,13 +626,111 @@
     }
 
     function checkTile(playerPos) {
-        
-        /*
-        * Being done by Sean/Dave
-        */
-
-        console.log("Tile is: " + playerPos + ", checking tile...");
+        if(playerPos == "0010" || "0000") {
+            //This is the jail tile, do nothing
+        } else if(playerPos == "0007" || playerPos == "1008" || playerPos == "0400") {
+            //Player has landed on chance card
+            console.log("Draw chance card");
+        } else if(playerPos == "0002" || playerPos == "0710" || "0700") {
+            //Player has landed on community chess
+            console.log("Draw community chest card");
+        } else if(playerPos == "1010") {
+            //Player has landed on Free Parking
+            console.log("Free Parking");
+        } else if(playerPos == "1000") {
+            //Player is sent to jail
+            console.log("Player is sent to jail");
+        } else { 
+            isOwned(players[turn], playerPos);
+        }
     }
+
+    function isOwned(playerObj, tileID) {
+        //Checking if the tile landed on play 'playr' is owned or naw
+        if(property.owner == null) {
+            //Buy or Auction GUI visible
+            document.getElementById("buyOrAuction").visibility = true;
+            //buyOrNot(playerObj, tileID);
+        } else {
+            payRent();
+        }
+    }
+
+    function buyOrNot(playerObj, tileID) {
+        //Ask if the player wants to buy or send the property to auction
+        var choice = confirm("Would you like to buy this here propertah?");
+        if(choice) {
+            buy(playerObj, tileID);
+        } else {
+            auction(tileID);
+        }
+    }
+
+    function buy(playerObj, tileID) {
+        addToPlayerAssets(playerObj, tileID);
+        payToBank(playerobj, tileID);
+    }
+
+    function auction(propertyObj){
+        //Ints
+        var auctionPrice = 10;
+        var amountBidded; //Button with amount bidded
+        var pointerPlayer;
+        //Booleans
+        var isAuctionOn = true;
+        //Setter when player withdraws to set ie to true.
+        //Player is dequeued
+        var isWithdrawn = false; 
+        //var endTurn = false;
+        //Queue
+        var playerCount = new Queue;
+        for (i=0; i<players.length; i++){
+            playerCount.enqueue(players[i]);
+            i++;
+        }
+        var j=0;
+        while(isAuctionOn){
+            if (j > playerCount.size){
+                j = 0
+            }
+            pointerPlayer = playerCount[j];
+            if(playerCount.size == 1){
+                alert("You won the auction");
+                //Pay auction price
+                //Player buys property - Call function buy
+                property.Owner = playerCount[pointerPlayer].player_id; //Property is given to player
+                isAuctionOn = false;
+                property.biddedPrice = auctionPrice;//amountBidded;
+                buy(playerCount[pointerPlayer], propertyObj);
+            }else if(isWithdrawn == true){
+                alert("You withdrew from the auction");
+                playerCount.dequeue();
+            }else if(auctionPrice > playerCount.capital){
+                alert("You have been withdrawn from the auction");
+                playerCount.dequeue();
+                //isWithdrawn = true;
+            }else{
+                if(auctionPrice > prop.Price){
+                    alert("The price is above the original price!");
+                }else{
+                    if(amountBidded == 1){
+                        auctionPrice ++;
+                        //endTurn = true;
+                        //playerCount.endTurn(playerCount.pointerPlayer);
+                    }else if(amountBidded == 10){
+                        auctionPrice += 10;
+                        //endTurn = true;
+                        //playerCount.endTurn(playerCount.player_id);
+                    }else if(amountBidded == 100){
+                        auctionPrice += 100;
+                        //endTurn = true;
+                        //playerCount.endTurn(playerCount.player_id);
+                    }
+                }
+            }
+            j++;
+        }   
+    } 
 
     function placeInJail() {
         //Setting all the appropriate flags for being in jail. Must reset all the vairables to
@@ -372,7 +844,8 @@
         var num1 = Math.floor(Math.random() * 6) + 1;
         var num2 = Math.floor(Math.random() * 6) + 1;
 
-        /*
+        
+        //;;;
         if(rollEven) {
             var h1 = [1, 3, 1, 2, 4, 5, 2, 3, 4];
             var h2 = [3, 1, 5, 4, 2, 1, 6, 5, 6];
@@ -393,7 +866,8 @@
             num1 = 1;//z1[z];
             num2 = 1;//z1[z];
             rollDouble = false;
-        }*/
+        }
+        
 
         //Checking to see if a double is rolled
         if(num1 == num2 & !players[turn].jail.justReleased) {
@@ -408,5 +882,19 @@
         diceFadeIn();
 
         return [num1, num2];
+    }
+
+    function takeFromCapital(amount, person) {
+        //Takes 'amount' from the appropriate player (players[person])
+        players[person].capital -= amount;
+        if(players[person].capital > 0) {
+            console.log("Player's capital: " + players[person].capital);
+        } else if(players[person].capital <= 0) {
+            players[person].capital = 0;
+            console.log("Player is now bankrupt");
+            /*
+            * Probably call some function about cleaning up the player's variables
+            */
+        }
     }
 })();
