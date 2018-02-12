@@ -8,7 +8,7 @@
     width:700px;
     height:700px;
   }
-
+  
   table{
     border-collapse: collapse;
     width:700px;
@@ -19,6 +19,14 @@
   #sq{
     border: none;
     width: 53.6px;
+    padding: 0px;
+    margin: 0px;
+  }
+  
+  #edge{
+    border: none;
+    height: 90px !important;
+    width: 90px !important;
     padding: 0px;
     margin: 0px;
   }
@@ -33,27 +41,25 @@
     justify-content:center;
     background-color: #ddf4df;
   }
-
+  
   table {
-    table-layout: fixed;
-    border: 1px solid white;
+    border: 4px solid black;
     text-align: center;
     table-layout:fixed;
     border-collapse: collapse;
     width:700px;
     height:700px;
   }
-
+  
   #board {
       background-image: url('images/Board.jpg');
       background-size: 700px 700px;
-
   }
 
     .edge {
         border: none;
-        height: 94px !important;
-        width: 95px !important;
+        height: 93px !important;
+        width: 93px !important;
         padding: 0px;
         margin: 0px;
     }
@@ -61,41 +67,45 @@
       width: 20px;
       height:20px;
     }
-    /*td{
-      border: 1px solid white;
-    }
-   .right{
-      height: 56.85px;
-      width: 25px;
-      background-color: black;
+
+    #dicePosition1 {
+      float: left;
+      height: 15px;
+      width: 15px;
+      padding: 15px;
+      margin: 10px;
+      border: 1px solid black;
+      border-radius: 5px;  
+      font-size:18px;
+      background-color: white;
+      /*visibility: visible;*/
+      opacity: 0.0;
     }
 
-    .left{
-      height: 56.5px;
-      width: 25px;
-      background-color: black;
-      float: right;
-    }
-    .top{
-      height: 25px;
-      width: 56.5px;
-      background-color: black;
-
-    }
-    .bottom{
-      height: 25px;
-      width: 56.5px;
-      background-color: black;
-      position: static;
-
+    #dicePosition2 {
+      float: left;
+      height: 15px;
+      width: 15px;
+      padding: 15px;
+      margin: 10px;
+      border: 1px solid black;
+      border-radius: 5px;  
+      font-size:18px;
+      background-color: white;
+      /*visibility: visible;*/
+      opacity: 0.0;
     }
 
-    .hor{
-      width: 94px;
-      height:56px;
+    #goojf {
+      visibility: hidden; 
+      height: 75px;
+      width: 150px;
+      border: 2px solid black;
     }
-    .ver{
-      width: 52px;
-      height:89px;
+
+    #goojfNo {
+      visibility: hidden; 
+      height: 75px;
+      width: 150px;
+      border: 2px solid black;
     }
-*/
