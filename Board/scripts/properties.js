@@ -464,7 +464,10 @@ var properties = {
     //End of all coloured properties
     
     //Start of Railroads
+
+    //numberOfRailRoads is used to determine how many railroads the players have as we have no other way of accessing it
     "0005":{
+        type: "railroad",
         price: 200,
         name: "Railroad 1",
         owner: null,
@@ -481,6 +484,7 @@ var properties = {
     },
 
     "0510":{
+        type: "railroad",
         price: 200,
         name: "Railroad 2",
         owner: null,
@@ -497,12 +501,13 @@ var properties = {
     },
 
     "1005":{
+        type: "railroad",
         price: 200,
         name: "Railroad 3",
         owner: null,
         mortgaged: false,
         boughtFor: null,
-        numberOfRailRoads: 0,
+        numberOfRailRoads: 0, 
         ownAllOfColour: false,
         rent : {
             1 : 25,
@@ -513,6 +518,7 @@ var properties = {
     },
 
     "0500":{
+        type: "railroad",
         price: 200,
         name: "Railroad 4",
         owner: null,
@@ -531,6 +537,7 @@ var properties = {
 
     //Start of Utilities
     "0210":{
+        type: "utility",
         price: 150,
         name: "Utility 1",
         owner: null,
@@ -546,6 +553,7 @@ var properties = {
     },
 
     "1002":{
+        type: "utility",
         price: 150,
         name: "Utility 2",
         owner: null,
