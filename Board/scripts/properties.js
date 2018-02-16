@@ -10,6 +10,7 @@ var properties = {
         houseValue: 50,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 2,
         ownAllOfColour: false,
         rent : {
             0 : 2,
@@ -30,6 +31,7 @@ var properties = {
         houseValue: 50,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 2,
         ownAllOfColour: false,
         rent : {
             0 : 4,
@@ -50,6 +52,7 @@ var properties = {
        houseValue: 50,
        boughtFor: null,
        numberOfHouses: 0,
+       numberOfColours: 3,
        ownAllOfColour: false,
        rent : {
            0 : 6,
@@ -70,6 +73,7 @@ var properties = {
         houseValue: 50,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 6,
@@ -90,6 +94,7 @@ var properties = {
         houseValue: 50,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 8,
@@ -110,6 +115,7 @@ var properties = {
         houseValue: 100,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 10,
@@ -128,6 +134,10 @@ var properties = {
         owner: null,
         mortgaged: false,
         houseValue: 100,
+        boughtFor: null,
+        numberOfHouses: 0,
+        numberOfColours: 3,
+        ownAllOfColour: false,
         rent : {
             0 : 10,
             1 : 50,
@@ -146,6 +156,7 @@ var properties = {
         mortgaged: false,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 12,
@@ -166,6 +177,7 @@ var properties = {
         houseValue: 100,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 14,
@@ -186,6 +198,7 @@ var properties = {
         houseValue: 100,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 14,
@@ -206,6 +219,7 @@ var properties = {
         houseValue: 100,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 16,
@@ -226,6 +240,7 @@ var properties = {
         houseValue: 150,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 18,
@@ -246,6 +261,7 @@ var properties = {
         houseValue: 150,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 18,
@@ -266,6 +282,7 @@ var properties = {
         houseValue: 150,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 20,
@@ -286,6 +303,7 @@ var properties = {
         houseValue: 150,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 22,
@@ -306,6 +324,7 @@ var properties = {
         houseValue: 150,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 22,
@@ -326,6 +345,7 @@ var properties = {
         houseValue: 150,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 24,
@@ -346,6 +366,7 @@ var properties = {
         houseValue: 200,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 26,
@@ -366,6 +387,7 @@ var properties = {
         houseValue: 200,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 26,
@@ -386,6 +408,7 @@ var properties = {
         houseValue: 200,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 3,
         ownAllOfColour: false,
         rent : {
             0 : 28,
@@ -406,6 +429,7 @@ var properties = {
         houseValue: 200,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 2,
         ownAllOfColour: false,
         rent : {
             0 : 35,
@@ -426,6 +450,7 @@ var properties = {
         houseValue: 200,
         boughtFor: null,
         numberOfHouses: 0,
+        numberOfColours: 2,
         ownAllOfColour: false,
         rent : {
             0 : 50,
