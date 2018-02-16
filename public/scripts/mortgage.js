@@ -14,15 +14,16 @@ while(transaction){
         property.rent[0] = 0;
         transation = false;
         }
+    //otherwise property has improvements on it so remove and sell property
+    //property is sold at $50 regardless of what player originally paid for them. #HouseRule
     else{
         while(property.houses != 0){
             property.houses -=1;
-            userObj.capital += property.houses.cost;
+            userObj.capital += 50;
             }
         }
     }
 }
-
 function PayOffLoan(property){
 //calculate the loan amount
 var loan = property.price/2;
