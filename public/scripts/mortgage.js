@@ -1,4 +1,6 @@
-
+//This function is always an available option to the player
+//if player wants to call this function they must pass their property of interest as an explicit parameter.
+//only properties which the player owns deeds to should be available for mortgage.
 function mortgage(property){
 //calculate the loan amount
 var loan = property.price/2;
