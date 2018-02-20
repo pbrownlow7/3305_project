@@ -1,73 +1,61 @@
-/* body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
+body {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-color: #ddf4df;
+}
 
-  img{
-    width:700px;
-    height:700px;
-  }
-  
-  table{
-    border-collapse: collapse;
-    width:700px;
-    height:700px;
-    table-layout: fixed;
-  }
+table{
+  border: 1px solid black;
+  text-align: center;
+  border-collapse: collapse;
+  width:700px;
+  height:700px;
+  padding: 0px;
+  margin: 0px;
+  table-layout: fixed;
+}
+#board {
+    background-image: url('images/Board.jpg');
+    background-size: 700px 700px;
 
-  #sq{
-    border: none;
-    width: 53.6px;
-    padding: 0px;
-    margin: 0px;
-  }
-  
-  #edge{
-    border: none;
-    height: 90px !important;
-    width: 90px !important;
-    padding: 0px;
-    margin: 0px;
-  }
 
-  div {
-      background-image: url('images/Board.jpg');
-  } */
-
-  body {
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background-color: #ddf4df;
+}
+  .edge {
+      border: 1px solid white;
+      height: 91px !important;
+      width: 91px !important;
+      border-collapse: collapse;
+      padding: 0px;
+      margin: 0px;
+      table-layout: fixed;
+      overflow: hidden;
   }
-  
-  table {
-    border: 4px solid black;
-    text-align: center;
-    table-layout:fixed;
-    border-collapse: collapse;
-    width:700px;
-    height:700px;
-  }
-  
-  #board {
-      background-image: url('images/Board.jpg');
-      background-size: 700px 700px;
-  }
+  .player{
+    width: 20px;
+    height:20px;
 
-    .edge {
-        border: none;
-        height: 93px !important;
-        width: 93px !important;
-        padding: 0px;
-        margin: 0px;
-    }
-    .player{
-      width: 20px;
-      height:20px;
-    }
+  }
+  .ver{
+   width: 50px;
+   height: 90px;
+   padding: 0px;
+   margin: 0px;
+   border-collapse: collapse;
+   border: 1px solid white;
+   table-layout: fixed;
+ }
 
+ .hor{
+   width: 90px;
+   height: 56;
+   padding: 0px;
+   margin: 0px;
+   border-collapse: collapse;
+   border: 1px solid white;
+   table-layout: fixed;
+
+ }
     #dicePosition1 {
       float: left;
       height: 15px;
@@ -75,7 +63,7 @@
       padding: 15px;
       margin: 10px;
       border: 1px solid black;
-      border-radius: 5px;  
+      border-radius: 5px;
       font-size:18px;
       background-color: white;
       /*visibility: visible;*/
@@ -89,7 +77,7 @@
       padding: 15px;
       margin: 10px;
       border: 1px solid black;
-      border-radius: 5px;  
+      border-radius: 5px;
       font-size:18px;
       background-color: white;
       /*visibility: visible;*/
@@ -97,21 +85,21 @@
     }
 
     #goojf {
-      visibility: hidden; 
+      visibility: hidden;
       height: 75px;
       width: 150px;
       border: 2px solid black;
     }
 
     #goojfNo {
-      visibility: hidden; 
+      visibility: hidden;
       height: 75px;
       width: 150px;
       border: 2px solid black;
     }
 
     #buyOrAuction {
-      visibility: hidden; 
+      visibility: hidden;
       height: 75px;
       width: 150px;
       border: 2px solid black;
@@ -127,3 +115,33 @@
     #bidder {
       visibility: hidden;
     }
+    #temp{
+      float: right;
+    }
+
+    /*  .right{
+       height: 55px;
+       width: 22px;
+       border: 1px solid white;
+       background-color: black;
+
+     }
+     .left{
+       height: 55px;
+       width: 22px;
+       background-color: black;
+       float: right;
+     }
+
+     .top{
+       height: 22px;
+       width: 55px;
+       background-color: black;
+     }
+
+     .bottom{
+       height: 22px;
+       width: 55px;
+       background-color: black;
+     }
+*/
