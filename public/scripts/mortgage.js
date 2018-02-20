@@ -33,8 +33,12 @@ function PayOffLoan(){
 var loan = prop.price/2;
 //calculate the cost of the loan
 var payBack = loan*.1 + loan;
-user.capital -= payBack;
-prop.mortgaged = false;
-prop.rent[0] = BaseRent;
+if(user.capital < payBack){
+    user.bankrupt();
+}
+else{
+    user.capital -= payBack;
+    prop.mortgaged = false;
+    prop.rent[0] = BaseRent;
 
 }
