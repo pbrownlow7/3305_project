@@ -1,165 +1,106 @@
-body {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background-color: #ddf4df;
-}
+  body {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background-color: #ddf4df;
+  }
 
-table{
-  border: 1px solid black;
-  text-align: center;
-  border-collapse: collapse;
-  width:700px;
-  height:700px;
-  padding: 0px;
-  margin: 0px;
-  table-layout: fixed;
-  resize: none;
-}
+  table{
+    border: 1px solid black;
+    text-align: center;
+    border-collapse: collapse;
+    width:700px;
+    height:700px;
+    padding: 0px;
+    margin: 0px;
+    table-layout: fixed;
+  }
+  #board {
+      background-image: url('images/Board.jpg');
+      background-size: 700px 700px;
 
-#board {
-    background-image: url('images/Board.jpg');
-    background-size: 700px 700px;
-}
-  .edge {
-      border: 1px solid white;
-      height: 91px !important;
-      width: 91px !important;
-      border-collapse: collapse;
-      padding: 0px;
-      margin: 0px;
-      table-layout: fixed;
-      overflow: hidden;
-      resize: none;
 
   }
-  .player{
-    width: 20px;
-    height:20px;
-
-  }
-  .ver{
-   width: 55px;
-   height:91px;
-   padding: 0px;
-   margin: 0px;
-   border-collapse: collapse;
-   border: 1px solid white;
-   table-layout: fixed;
-   resize: none;
- }
-
- .hor{
-   width: 91px;
-   height:55px;
-   padding: 0px;
-   margin: 0px;
-   border-collapse: collapse;
-   border: 1px solid white;
-   table-layout: fixed;
-   resize: none;
-
- }
-    #dicePosition1 {
-      height: 10px;
-      width: 10px;
-      padding: 10px;
-      margin: 5px;
-      border: 1px solid black;
-      border-radius: 5px;
-      font-size:18px;
-      background-color: white;
-      /*visibility: visible;*/
-      opacity: 0.0;
+    .edge {
+        border: 1px solid white;
+        height: 91px !important;
+        width: 91px !important;
+        border-collapse: collapse;
+        padding: 0px;
+        margin: 0px;
+        table-layout: fixed;
+        overflow: hidden;
     }
+    .player{
+      width: 20px;
+      height:20px;
 
-    #dicePosition2 {
-      height: 15px;
-      width: 15px;
-      padding: 10px;
-      margin: 5px;
-      border: 1px solid black;
-      border-radius: 5px;
-      font-size:18px;
-      background-color: white;
-      /*visibility: visible;*/
-      opacity: 0.0;
     }
+    .ver{
+     width: 56px;
+     height: 90px;
+     padding: 0px;
+     margin: 0px;
+     border-collapse: collapse;
+     border: 1px solid white;
+     table-layout: fixed;
+   }
 
-    #goojf {
-      visibility: hidden;
-      height: 75px;
-      width: 150px;
-      border: 2px solid black;
-    }
+   .hor{
+     width: 90px;
+     height: 56;
+     padding: 0px;
+     margin: 0px;
+     border-collapse: collapse;
+     border: 1px solid white;
+     table-layout: fixed;
 
-    #goojfNo {
-      visibility: hidden;
-      height: 75px;
-      width: 150px;
-      border: 2px solid black;
-    }
+   }
+  /*  .right{
+     height: 55px;
+     width: 22px;
+     border: 1px solid white;
+     background-color: black;
 
-    #buyOrAuction {
-      visibility: hidden;
-      height: 75px;
-      width: 150px;
-      border: 2px solid black;
-    }
+   }
+   .left{
+     height: 55px;
+     width: 22px;
+     background-color: black;
+     float: right;
+   }
 
-    #auctionWindow {
-      visibility: hidden;
-      height: 150px;
-      width: 300px;
-      border: 2px black solid;
-    }
+   .top{
+     height: 22px;
+     width: 55px;
+     background-color: black;
+   }
 
-    #bidder {
-      visibility: hidden;
-    }
-/*
-     .right{
-       height: 56.5px;
-       width: 20px;
-       background-color: black;
-       position: relative;
-       padding: 0px;
-       margin: 0px;
+   .bottom{
+     height: 22px;
+     width: 55px;
+     background-color: black;
+   }
 
 
-     }
-     .left{
-       height: 56.5px;
-       width: 20px;
-       background-color: black;
-       resize: none;
-       padding: 0px;
-       margin: 0px;
-       position: relative;
-       left: 71px;
-     }
+    .ver{
+     width: 55px;
+     height: 90px;
+     padding: 0px;
+     margin: 0px;
+     border: 1px solid white;
+     table-layout: fixed;
+   }
 
-     .top{
-       height: 20px;
-       width: 56.5px;
-       background-color: black;
-       resize: none;
-       padding: 0px;
-       margin: 0px;
-       position: relative;
-       top: 37px;
-       resize: none
-     }
+   .hor{
+     width: 90px;
+     height: 55;
+     padding: 0px;
+     margin: 0px;
+     border: 1px solid white;
+     table-layout: fixed;
 
-     .bottom{
-       height: 20px;
-       width: 56.5pxx;
-       background-color: black;
-       resize: none;
-       padding: 0px;
-       margin: 0px;
-       position: relative;
-       bottom:37px;
-       resize: none;
-     }
-*/
+   }
+
+
+    */
