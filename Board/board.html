@@ -4,11 +4,11 @@
         <title>Monopoly Board</title>
         <link type="text/css" rel="stylesheet" href="board.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-        <script src="board.js"></script>
+        <script src="boardv2.js"></script>
     </head>
 
     <body>
-        <div>
+        <div id="panel">
             <p id="bidder">Player 1</p>
             <div id="goojf">
                 Use Get Out Of Jail Free Card?
@@ -49,6 +49,7 @@
 
             </div>
         </div>
+        <br>
         <div id="board">
             <table>
                 <tr>
@@ -224,8 +225,8 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td><p id="dicePosition1"></p></td>
-                    <td id= "center">
+                    <td class="hor"><p id="dicePosition1"></p></td>
+                    <td class="hor" id= "center">
                         <p id= "dicePosition2"></p>
                     </td>
                     <td></td>
@@ -409,9 +410,11 @@
                 </tr>
             </table>
         </div>
+
         <button id="temp" disable=false>
             Roll Dice
         </button>
+
         <!---
         <button id="bankruptButton">
             Bankrupt

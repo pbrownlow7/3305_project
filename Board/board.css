@@ -23,13 +23,14 @@ table{
 }
   .edge {
       border: 1px solid white;
-      height: 91px !important;
-      width: 91px !important;
+      height: 91px;
+      width: 91px ;
       border-collapse: collapse;
       padding: 0px;
       margin: 0px;
       table-layout: fixed;
       overflow: hidden;
+      white-space: nowrap;
   }
   .player{
     width: 20px;
@@ -37,8 +38,8 @@ table{
 
   }
   .ver{
-   width: 56px;
-   height: 90px;
+    width: 56.5px;
+    height:91px;
    padding: 0px;
    margin: 0px;
    border-collapse: collapse;
@@ -47,8 +48,8 @@ table{
  }
 
  .hor{
-   width: 90px;
-   height: 56;
+   width: 91px;
+   height:56.5px;
    padding: 0px;
    margin: 0px;
    border-collapse: collapse;
@@ -57,11 +58,10 @@ table{
 
  }
     #dicePosition1 {
-      float: left;
-      height: 15px;
-      width: 15px;
-      padding: 15px;
-      margin: 10px;
+      height: 10px;
+      width: 10px;
+      padding: 10px;
+      margin: 5px;
       border: 1px solid black;
       border-radius: 5px;
       font-size:18px;
@@ -71,11 +71,10 @@ table{
     }
 
     #dicePosition2 {
-      float: left;
       height: 15px;
       width: 15px;
-      padding: 15px;
-      margin: 10px;
+      padding: 10px;
+      margin: 5px;
       border: 1px solid black;
       border-radius: 5px;
       font-size:18px;
@@ -115,11 +114,8 @@ table{
     #bidder {
       visibility: hidden;
     }
-    #temp{
-      float: right;
-    }
 
-    /*  .right{
+    /* .right{
        height: 55px;
        width: 22px;
        border: 1px solid white;
