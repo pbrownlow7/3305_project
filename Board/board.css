@@ -1,106 +1,182 @@
-  body {
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background-color: #ddf4df;
-  }
+body {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-color: #ddf4df;
+}
 
-  table{
-    border: 1px solid black;
-    text-align: center;
-    border-collapse: collapse;
-    width:700px;
-    height:700px;
-    padding: 0px;
-    margin: 0px;
-    table-layout: fixed;
+table{
+  border: 2px solid black;
+  text-align: center;
+  border-collapse: collapse;
+  width:700px;
+  height:700px;
+  padding: 0px;
+  margin: 0px;
+  table-layout: fixed;
+  resize: none;
+}
+
+#board {
+    background-image: url('images/Board.jpg');
+    background-size: 700px 700px;
+}
+  .edge {
+      /*border: 1px solid white;*/
+      height: 91px !important;
+      width: 91px !important;
+      border-collapse: collapse;
+      padding: 0px;
+      margin: 0px;
+      table-layout: fixed;
+      resize: none;
+
   }
-  #board {
-      background-image: url('images/Board.jpg');
-      background-size: 700px 700px;
+  .player{
+    width: 25px;
+    height:25px;
+
+  }
+  .ver{
+   width: 55px;
+   height:91px;
+   padding: 0px;
+   margin: 0px;
+   border-collapse: collapse;
+   /*border: 1px solid white;*/
+   table-layout: fixed;
+   resize: none;
+
+ }
+
+ .hor{
+   width: 91px;
+   height:55px;
+   padding: 0px;
+   margin: 0px;
+   border-collapse: collapse;
+   /*border: 1px solid white;*/
+   table-layout: fixed;
+   resize: none;
 
 
-  }
-    .edge {
-        border: 1px solid white;
-        height: 91px !important;
-        width: 91px !important;
-        border-collapse: collapse;
-        padding: 0px;
-        margin: 0px;
-        table-layout: fixed;
-        overflow: hidden;
+ }
+    #dicePosition1 {
+      height: 15px;
+      width: 15px;
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid black;
+      border-radius: 5px;
+      font-size:18px;
+      background-color: white;
+      /*visibility: visible;*/
+      opacity: 0.0;
     }
-    .player{
-      width: 20px;
-      height:20px;
 
+    #dicePosition2 {
+      height: 15px;
+      width: 15px;
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid black;
+      border-radius: 5px;
+      font-size:18px;
+      background-color: white;
+      /*visibility: visible;*/
+      opacity: 0.0;
     }
-    .ver{
-     width: 56px;
-     height: 90px;
-     padding: 0px;
-     margin: 0px;
-     border-collapse: collapse;
-     border: 1px solid white;
-     table-layout: fixed;
-   }
 
-   .hor{
-     width: 90px;
-     height: 56;
-     padding: 0px;
-     margin: 0px;
-     border-collapse: collapse;
-     border: 1px solid white;
-     table-layout: fixed;
+    #goojf {
+      visibility: hidden;
+      height: 75px;
+      width: 150px;
+      border: 2px solid black;
+    }
 
-   }
-  /*  .right{
-     height: 55px;
-     width: 22px;
-     border: 1px solid white;
-     background-color: black;
+    #goojfNo {
+      visibility: hidden;
+      height: 75px;
+      width: 150px;
+      border: 2px solid black;
+    }
 
-   }
-   .left{
-     height: 55px;
-     width: 22px;
-     background-color: black;
-     float: right;
-   }
+    #buyOrAuction {
+      visibility: hidden;
+      height: 75px;
+      width: 150px;
+      border: 2px solid black;
+    }
 
-   .top{
-     height: 22px;
-     width: 55px;
-     background-color: black;
-   }
+    #auctionWindow {
+      visibility: hidden;
+      height: 150px;
+      width: 300px;
+      border: 2px black solid;
+    }
 
-   .bottom{
-     height: 22px;
-     width: 55px;
-     background-color: black;
-   }
+    #bidder {
+      visibility: hidden;
+    }
+
+     .right{
+       height: 56.5px;
+       width: 20px;
+       padding: 0px;
+       margin: 0px;
+       float:left;
+       left: 0%;
+       top: 0%;
+       margin-left: 0px;
+       z-index: 2
 
 
-    .ver{
-     width: 55px;
-     height: 90px;
-     padding: 0px;
-     margin: 0px;
-     border: 1px solid white;
-     table-layout: fixed;
-   }
+     }
+     .left{
+       height: 56.5px;
+       width: 20px;
+       resize: none;
+       padding: 0px;
+       margin: 0px;
+       float: right;
+       left: 78%;
+       top: 0%;
+       margin-left: 0px;
+       z-index: 2
 
-   .hor{
-     width: 90px;
-     height: 55;
-     padding: 0px;
-     margin: 0px;
-     border: 1px solid white;
-     table-layout: fixed;
+     }
+     .top{
+       height: 20px;
+       width: 56.5px;
+       resize: none;
+       padding: 0px;
+       margin: 0px;
+       position: absolute;
+       top: 80px;
+       resize: none;
+       z-index: 2;
+     }
 
-   }
+     .bottom{
+       height: 20px;
+       width: 56.5px;
+       resize: none;
+       padding: 0px;
+       margin: 0px;
+       position: absolute ;
+       bottom: -50px;
+       resize: none;
+       z-index: 2;
+     }
 
-
-    */
+@import url(https://fonts.googleapis.com/css?family=Lato:100,400);
+#the-final-countdown {
+  background: #333;
+  font-family: 'Lato', sans-serif;
+  text-align: center;
+  color: #eee;
+  text-shadow: 1px 1px 5px black;
+  padding: 1rem 0;
+  font-size: 3rem;
+  border: 1px solid #000;
+}

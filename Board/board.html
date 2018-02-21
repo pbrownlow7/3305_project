@@ -4,77 +4,123 @@
         <title>Monopoly Board</title>
         <link type="text/css" rel="stylesheet" href="board.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-        <script src="board.js"></script>
+        <script src="boardv2.js"></script>
     </head>
 
     <body>
+      <div id="the-final-countdown">
+         <p></p>
+     </div>
+
+        <div id="panel">
+            <p id="bidder">Player 1</p>
+            <div id="goojf">
+                Use Get Out Of Jail Free Card?
+                <div>
+                    <button id="jYes">YES</button>
+                    <button id="jNo">NO</button>
+                </div>
+            </div>
+            <div id="goojfNo">
+                Pay Fine or Roll For Double
+                <div>
+                    <button id="fine">FINE</button>
+                    <button id="rd">ROLL</button>
+                </div>
+            </div>
+            <div id="buyOrAuction">
+                <center>Buy or Auction</center>
+                <div>
+                    <center>
+                        <button id="buy">BUY</button>
+                        <button id="auction">AUCTION</button>
+                    </center>
+                </div>
+            </div>
+            <div id="auctionWindow">
+                <div>
+                    <center id="currBid">Current bid: 10</center>
+                </div>
+                <div>
+                    <center id="madeBid"></center>
+                </div>
+                <center>
+                    <button id="1">1</button>
+                    <button id="10">10</button>
+                    <button id="100">100</button>
+                    <button id="withdraw">WITHDRAW</button>
+                </center>
+
+            </div>
+        </div>
+        <br>
         <div id="board">
             <table>
                 <tr>
                     <td class="edge" id="1010">
                         <div>
                         </div>
-                        Free P
+
                     </td>
 
                     <td class="ver" id="1009">
                         <div class = "top">
                         </div>
-                        Red
+
                     </td>
 
                     <td class="ver" id="1008">
                         <div>
                         </div>
-                        Chance
+
                     </td>
 
                     <td class="ver" id="1007">
                         <div class = "top">
                         </div>
-                        Red
+
                     </td>
 
                     <td class="ver" id="1006">
                         <div class = "top">
                         </div>
-                        Red
+
                     </td>
 
                     <td class="ver" id="1005">
                         <div>
                         </div>
-                        Rail
+
                     </td>
 
                     <td class="ver" id="1004">
                         <div class = "top">
                         </div>
-                        Yellow
+
                     </td>
 
                     <td class="ver" id="1003">
                         <div class = "top">
                         </div>
-                        Yellow
+
                     </td>
 
                     <td class="ver" id="1002">
                         <div>
                         </div>
-                        Water Works
+
                     </td>
 
                     <td class="ver" id="1001">
                         <div class = "top">
                         </div>
-                        Yellow
+
                     </td>
 
                     <td class="edge" id="1000">
                         <div>
                         </div>
-                        Go to Jail
+
                     </td>
                 </tr>
 
@@ -82,7 +128,7 @@
                     <td class="hor" id="0910">
                         <div class = "left">
                         </div>
-                        Orange
+
                     </td>
 
                     <td></td>
@@ -98,7 +144,7 @@
                     <td class="hor" id="0900">
                         <div class = "right">
                         </div>
-                        Green
+
                     </td>
                 </tr>
 
@@ -106,7 +152,7 @@
                     <td class="hor" id="0810">
                         <div class = "left">
                         </div>
-                        Orange
+
                     </td>
                     <td></td>
                     <td></td>
@@ -121,7 +167,7 @@
                     <td class="hor" id="0800">
                         <div class = "right">
                         </div>
-                        Green
+
                     </td>
                 </tr>
 
@@ -129,7 +175,7 @@
                     <td class="hor" id="0710">
                         <div>
                         </div>
-                        Com Chest
+
                     </td>
 
                     <td></td>
@@ -145,7 +191,7 @@
                     <td class="hor" id="0700">
                         <div>
                         </div>
-                        Com Chest
+
                     </td>
                 </tr>
 
@@ -153,7 +199,7 @@
                     <td class="hor" id="0610">
                         <div class = "left">
                         </div>
-                        Orange
+
                     </td>
 
                     <td></td>
@@ -169,7 +215,7 @@
                     <td class="hor" id="0600">
                         <div class = "right">
                         </div>
-                        Green
+
                     </td>
                 </tr>
 
@@ -177,14 +223,16 @@
                     <td class="hor" id="0510">
                         <div>
                         </div>
-                        Rail
+
                     </td>
 
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
-                    <td id= "center"></td>
+                    <td class="hor"><p id="dicePosition1"></p></td>
+                    <td class="hor" id= "center">
+                        <p id= "dicePosition2"></p>
+                    </td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -193,7 +241,7 @@
                     <td class="hor" id="0500">
                         <div>
                         </div>
-                        Rail
+
                     </td>
                 </tr>
 
@@ -201,7 +249,7 @@
                     <td class="hor" id="0410">
                         <div class = "left">
                         </div>
-                        Pink
+
                     </td>
 
                     <td></td>
@@ -217,7 +265,7 @@
                     <td class="hor" id="0400">
                       <div>
                       </div>
-                      Chance
+
                     </td>
                 </tr>
 
@@ -225,7 +273,7 @@
                     <td class="hor" id="0310">
                         <div class = "left">
                         </div>
-                        Pink
+
                     </td>
 
                     <td></td>
@@ -241,7 +289,7 @@
                     <td class="hor" id="0300">
                         <div class = "right">
                         </div>
-                        Blue
+
                     </td>
                 </tr>
 
@@ -249,7 +297,7 @@
                     <td class="hor" id="0210">
                         <div>
                         </div>
-                        Elec.Comp
+
                     </td>
 
                     <td></td>
@@ -265,14 +313,14 @@
                     <td class="hor" id="0200">
                         <div>
                         </div>
-                          Tax
+
                     </td>
                 </tr>
 
                 <tr>
                     <td class="hor" id="0110">
                         <div class = "left" >
-                        Pink
+
                         </div>
                     </td>
 
@@ -289,7 +337,7 @@
                     <td class="hor" id="0100">
                         <div class = "right">
                         </div>
-                        Blue
+
                     </td>
                 </tr>
 
@@ -297,61 +345,61 @@
                     <td class="edge" id="0010">
                         <div class = "jail" >
                         </div>
-                         Jail
+
                     </td>
 
                     <td class="ver" id="0009">
                         <div class = "bottom">
                         </div>
-                            Light Blue
+
                     </td>
 
                     <td class="ver" id="0008">
                         <div class = "bottom">
                         </div>
-                            Light Blue
+
                     </td>
 
                     <td class="ver" id="0007">
                         <div>
                         </div>
-                          Chance
+
                     </td>
 
                     <td class="ver" id="0006">
                         <div class = "bottom">
                         </div>
-                            Light Blue
+
                     </td>
 
                     <td class="ver" id="0005">
                         <div>
                         </div>
-                        Rail
+
                     </td>
 
                     <td class="ver" id="0004">
                         <div>
                         </div>
-                            Inc. Tax
+
                     </td>
 
                     <td class="ver" id="0003">
                         <div class = "bottom">
                         </div>
-                         Brown
+
                     </td>
 
                     <td class="ver" id="0002">
                         <div>
                         </div>
-                            Com Ch
+
                     </td>
 
                     <td class="ver" id="0001">
                       <div class = "bottom">
                       </div>
-                        Brown
+
                     </td>
 
                     <td class="edge" id="0000">
@@ -366,8 +414,27 @@
                 </tr>
             </table>
         </div>
-        <button id="temp">
-            Click me daddy
+
+        <button id="temp" disable=false>
+            Roll Dice
         </button>
+
+        <!---
+        <button id="bankruptButton">
+            Bankrupt
+        </button>
+        <button id="temp1">
+            GOOJF cards
+        </button>
+        <button id="temp2">
+            Even number
+        </button>
+        <button id="temp3">
+            Odd number
+        </button>
+        <button id="temp4">
+            Double
+        </button>
+        -->
     </body>
 </html>
