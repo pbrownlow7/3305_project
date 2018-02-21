@@ -633,6 +633,34 @@ var properties = {
     var bid10Button;
     var bid100Button;
     var withdrawButton;
+    
+    
+    var hours = 2;
+    var min = 30;
+    var sec = 0;
+	
+    setInterval(function time(){
+    if(sec == 0 && min != 0 ){
+       min = min-1;
+       sec = 60;
+    }
+    else if(sec == 0 && min ==0 && hours != 0 ){
+      hours = hours -1;
+      min = 59;
+      sec = 60;
+    }
+    else if (hours == 0 && min == 0 && sec == 0){
+      alert("Game Has Ended"); // function here for black screen or game termination
+    }
+    var d = new Date();
+    sec = sec -1;
+    if((sec + '').length == 1){
+          sec = '0' + sec;
+    }
+    jQuery('#clock p').html(hours+':'+min+':'+sec)
+    }, 1000);
+	
+	
 
     function init () {
         players.push(player(document.getElementById ("player1"), "player1"));
