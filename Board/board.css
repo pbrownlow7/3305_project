@@ -24,7 +24,7 @@ table{
   .edge {
       /*border: 1px solid white;*/
       height: 91px !important;
-      width: 91px !important;
+      width: 90px !important;
       border-collapse: collapse;
       padding: 0px;
       margin: 0px;
@@ -120,6 +120,7 @@ table{
     }
 
      .right{
+       /* background-color: black;*/
        height: 56.5px;
        width: 20px;
        padding: 0px;
@@ -133,6 +134,7 @@ table{
 
      }
      .left{
+        /* background-color: black;*/
        height: 56.5px;
        width: 20px;
        resize: none;
@@ -146,6 +148,7 @@ table{
 
      }
      .top{
+        /* background-color: black;*/
        height: 20px;
        width: 56.5px;
        resize: none;
@@ -158,19 +161,20 @@ table{
      }
 
      .bottom{
+       /* background-color: black;*/
        height: 20px;
        width: 56.5px;
        resize: none;
        padding: 0px;
        margin: 0px;
        position: absolute ;
-       bottom: -50px;
+       bottom: -8px;
        resize: none;
        z-index: 2;
      }
 
 @import url(https://fonts.googleapis.com/css?family=Lato:100,400);
-#the-final-countdown {
+#clock {
   background: #333;
   font-family: 'Lato', sans-serif;
   text-align: center;
@@ -180,3 +184,16 @@ table{
   font-size: 3rem;
   border: 1px solid #000;
 }
+/*
+@import url(https://fonts.googleapis.com/css?family=Lato:100,400);
+#auctionTimer {
+  background: #333;
+  font-family: 'Lato', sans-serif;
+  text-align: center;
+  color: #eee;
+  text-shadow: 1px 1px 5px black;
+  padding: 1rem 0;
+  font-size: 3rem;
+  border: 1px solid #000;
+}
+*/
