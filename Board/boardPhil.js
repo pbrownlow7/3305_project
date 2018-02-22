@@ -51,7 +51,7 @@ var properties = {
 
     "0006":{
         type: "colour",
-        colour: "light blue",
+        colour: "lightblue",
         price: 100,
         name: "Light Blue 1",
         owner: null,
@@ -73,7 +73,7 @@ var properties = {
 
     "0008":{
         type: "colour",
-        colour: "light blue",
+        colour: "lightblue",
         price: 100,
         name: "Light Blue 2",
         owner: null,
@@ -95,7 +95,7 @@ var properties = {
 
     "0009":{
         type: "colour",
-        colour: "light blue",
+        colour: "lightblue",
         price: 120,
         name: "Light Blue 3",
         owner: null,
@@ -607,6 +607,7 @@ var properties = {
     var currentAuction = [];
     var currentBidder;
     var currentBid;
+    var auctionStarter;
 
     document.addEventListener("DOMContentLoaded", init, false);
 
@@ -614,8 +615,8 @@ var properties = {
     
     //;;;Can be deleted
     /*
-    var bankruptPlayerButton;
-    var bankrupt = false;
+    //var bankruptPlayerButton;
+    //var bankrupt = false;
     var rollEven = false;
     var rollOdd = false;
     var rollDouble = false;
@@ -669,7 +670,7 @@ var properties = {
         
         //;;;Can be deleted
         /*
-        bankruptPlayerButton = document.getElementById("bankruptButton");
+        //bankruptPlayerButton = document.getElementById("bankruptButton");
         giveJailCardButton = document.getElementById("temp1");
         evenRollButton = document.getElementById("temp2");
         oddRollButton = document.getElementById("temp3");
@@ -690,7 +691,7 @@ var properties = {
         
         //;;;Can be deleted
         /*
-        bankruptPlayerButton.addEventListener("click", bankruptPlayerClicked, false);
+        //bankruptPlayerButton.addEventListener("click", bankruptPlayerClicked, false);
         giveJailCardButton.addEventListener("click", giveJailCardPressed, false);
         evenRollButton.addEventListener("click", evenRollPressed, false);
         oddRollButton.addEventListener("click", oddRollPressed, false);
@@ -871,7 +872,7 @@ var properties = {
     }
 
     function useJailCardClicked() {
-        players[turn].jail.jailCard = false;
+        players[turn].jail.getOutOfJail--;
         document.getElementById("goojf").style.visibility = "hidden"; //...change goojf
         //Have to put jail card back and shuffle as well
         releaseFromJail();
@@ -914,15 +915,21 @@ var properties = {
         //Wipe the dictionary in case any palyers hvae been eliminated from the game
         //The first element of currentAuction is the number of players left
         //The second element is the tile to be auctioned
+        auctionStarter = players[turn];
         currentAuction = [0, players[turn].position];
+        if(turn == numPlayers-1) {
+            turn = 0;
+        } else {
+            turn++
+        }
         currentBidder = turn+2;
-        currentBid = properties[players[turn].position].price * 0.2; //Starting bid is 10% of price
+        currentBid = properties[auctionStarter.position].price * 0.2; //Starting bid is 10% of price
         for(var b = 0; b < players.length; b++) {
             //Putting all the players in the auction
             //The player's stillIn attribute will be set to false when they withdraw from the 
             //auction or they are kicked out
             var tempPlayer = players[b];
-            if(tempPlayer.capital > currentBid) {
+            if(tempPlayer.money > currentBid) {
                 currentAuction.push({player: tempPlayer, stillIn: true});
                 currentAuction[0]++;
             } else {
@@ -962,18 +969,37 @@ var properties = {
         auction(0);
     }
 
-    function player(nameTemp) {//icon, nameTemp) {
+    function player(name) {//icon, nameTemp) {
         var player = {};
-        player.id = "";//icon;
-        player.capital = 1500;
-        player.name = nameTemp;
-        player.position = "0000";
-        player.double = false;
+        player.name = name; //done
+        player.id = null; //done
+        player.position = "0000"; //done
         player.doublesRolled = 0; //The number of doubles the player has rolled in a row
-        player.assets = [];
-        player.railroadsOwned = 0;
-        player.utilitiesOwned = 0;
-        player.jailCard = false;
+        player.money = 1500; //done
+        player.assets = []; //done
+
+        //player.railroadsOwned = 0;
+        //player.utilitiesOwned = 0;
+
+        player.properties = {};
+        player.properties["brown"] = [];
+        player.properties["pink"] = [];
+        player.properties["lightblue"] = [];
+        player.properties["orange"] = [];
+        player.properties["red"] = [];
+        player.properties["green"] = [];
+        player.properties["blue"] = [];
+        player.properties["yellow"] = [];
+        player.properties["railroad"] = [];
+        player.properties["utilities"] = [];
+
+        player.getOutOfJail = 0;
+        player.jail = {};
+        player.jail.jailTag = false;
+        player.jail.jailRoll = 0;
+        player.jail.justReleased = false;
+
+        /*player.jailCard = false;
         player.jail = {
             jailTag: false,
             jailRoll: 0,
@@ -981,7 +1007,7 @@ var properties = {
         };
         player.colours = {
             "brown": 0,
-            "light blue": 0,
+            "lightblue": 0,
             "pink": 0,
             "yellow": 0,
             "orange": 0,
@@ -998,7 +1024,7 @@ var properties = {
             "red": [],
             "green": [],
             "blue": []
-        };
+        };*/
         return player;
     }
 
@@ -1007,14 +1033,6 @@ var properties = {
         currentRoll = ro[0] + ro[1];
         diceRolled();
     }
-
-    function playersChosen() {
-        //document.getElementById("playerChoose").style.visibility = "hidden";
-        //document.getElementById("temp").disabled = false;
-        document.getElementById("0000").appendChild("<img class=\"player\" src=\"images/boot.png\" alt=\"Player1\" id=\"player1\">");
-        //document.getElementById(newPosition).appendChild(playerObj.id);
-    }
-
     
     //;;;
     /*
@@ -1070,7 +1088,7 @@ var properties = {
         }
     }
 
-    function incrementTurn() {
+    function    incrementTurn() {
         //Only increment if the player didn't roll a double
         if(!rolledDouble) {
             if(turn == numPlayers - 1) {
@@ -1168,25 +1186,31 @@ var properties = {
             //Buy or Auction GUI visible
             await sleep(1200); //Have to wait so the dice fade out and don't break the game
             document.getElementById("buyOrAuction").style.visibility = "visible";
-        } else if(properties[tileID].owner.id != players[turn].id) {
+        } else if(properties[tileID].owner != players[turn]) { //Took out .id here on both
             payRent(playerObj, properties[tileID].owner, tileID);
         }
     }
 
     function buy(playerObj, tileID, amount) {
-        playerObj.capital -= amount;//properties[tileID].price; //;;;Will be done properly by Donn
+        playerObj.money -= amount;//properties[tileID].price; //;;;Will be done properly by Donn
         properties[tileID].owner = playerObj;//players.indexOf(playerObj);
         playerObj.assets.push(tileID);
-        playerObj.colours[properties[tileID].colour]++;
+        //playerObj.colours[properties[tileID].colour]++; //changed
+        //playerObj.properties[properties[tileID].colour].push(tileID);
         if(properties[tileID].type == "colour") {
-            playerObj.ownedTilesByColour[properties[tileID].colour].push(tileID);
+            //playerObj.ownedTilesByColour[properties[tileID].colour].push(tileID); //changed
+            playerObj.properties[properties[tileID].colour].push(tileID);
         } else if(properties[tileID].type == "railroad") {
-            playerObj.railroadsOwned++;
+            //playerObj.railroadsOwned++; //changed
+            playerObj.properties["railroad"].push(tileID);
         } else if(properties[tileID].type == "utility") {
-            playerObj.utilitiesOwned++;
+            //playerObj.utilitiesOwned++; //changed
+            playerObj.properties["utilities"].push(tileID);
         }
         //console.log(playerObj.name + " " + playerObj.capital);
-        alert(playerObj.name + " bought " + tileID + " for " + amount + ". Player's capital is " + playerObj.capital);
+        console.log(players[turn].properties);
+        console.log(players[turn].assets);
+        alert(playerObj.name + " bought " + tileID + " for " + amount + ". Player's capital is " + playerObj.money);
     }
 
     function checkAuctionAtStart() {
@@ -1213,7 +1237,7 @@ var properties = {
         //or if there are still enough people in the auction
         if(currentAuction[0] > 1) {
             //Checking capital
-            if(currentAuction[currentBidder].player.capital < currentBid) {
+            if(currentAuction[currentBidder].player.money < currentBid) {
                 withdrawFromAuction();
                 auctionChecker();
             }
@@ -1230,6 +1254,7 @@ var properties = {
         document.getElementById("bidder").style.visibility = "hidden";
         document.getElementById("temp").disabled = false;
         decidingOnProperty = false;
+        turn = players.indexOf(auctionStarter);
         incrementTurn();
     }
 
@@ -1290,7 +1315,7 @@ var properties = {
         players[turn].jail.jailTag = true;
         players[turn].position = "0010";
         players[turn].doublesRolled = 0;
-        players[turn].double = false;
+        //players[turn].double = false;
         rolledDouble = false;
         //Putting the player in the jail tile (0010)
         document.getElementById(players[turn].position).appendChild(players[turn].id);
@@ -1299,7 +1324,7 @@ var properties = {
     function checkForJailCard() {
         //This is done at the start of the player's round so they don't have to press anything to 
         //trigger the GUI to pop up
-        if(players[turn].jailCard) {
+        if(players[turn].getOutOfJail > 0) {
             //If they do have a jailCard they will be asked if they want to use it. If they do,
             //the dice will be rolled automatically and they will be released from jail. They
             //won't be able to roll again if they get a double though. To pop the GUI, the Use
@@ -1330,7 +1355,7 @@ var properties = {
         if(players[turn].jail.jailRoll == jailTime) {
             releaseFromJail();
             //Must add logic to check if player has enough capital
-            players[turn].capital -= payOut;
+            players[turn].money -= payOut;
             diceRollInJail = rollDice();
             rolledDouble = false; //Just in case they roll a double after 3 turns
             currentRoll = diceRollInJail[0] + diceRollInJail[1];
@@ -1352,10 +1377,9 @@ var properties = {
         //This sets all the appropriate variables to what they should be if the player is released
         //from jail for whatever reason. rolledDouble must be set to false so they don't get to
         //roll again if they were released for rolling a double
-        var reset = 0;
 
         players[turn].jail.jailTag = false;
-        players[turn].jail.jailRoll = reset;
+        players[turn].jail.jailRoll = 0;
         players[turn].jail.justReleased = true;
         rolledDouble = false;
     }
@@ -1395,6 +1419,9 @@ var properties = {
         //This simulates the the two dice rolling, return two separate rolls in a list
         var num1 = Math.floor(Math.random() * 6) + 1;
         var num2 = Math.floor(Math.random() * 6) + 1;
+
+        //num1 = 3;
+        //num2 = 2;
         
         //;;;
         /*
@@ -1438,30 +1465,33 @@ var properties = {
         return [num1, num2];
     }
 
+    /*
     function takeFromCapital(amount, playerObj) {
         //Takes 'amount' from the appropriate player
-        playerObj.capital -= amount;
-        if(playerObj.capital > 0) {
-            console.log("Player's capital: " + playerObj.capital);
-        } else if(playerObj.capital <= 0) {
-            playerObj.capital = 0;
+        playerObj.money -= amount;
+        if(playerObj.money > 0) {
+            console.log("Player's capital: " + playerObj.money);
+        } else if(playerObj.money <= 0) {
+            playerObj.money = 0;
             console.log("Player is now bankrupt");
             /*
             * Probably call some function about cleaning up the player's variables
-            */
+            
         }
     }
+    */
 
+    /*
     function generalCollect(val, playerObj){
-        playerObj.capital += val;
-        console.log("Player's capital: "+ playerObj.capital);
+        playerObj.money += val;
+        console.log("Player's capital: "+ playerObj.money);
         console.log("Added " + val + " to player's account");
     }
 
     function collectKitty(playerObj){
         var oldKitty = parkingKitty;
         if (parkingKitty > 0){
-            playerObj.capital += parkingKitty;
+            playerObj.money += parkingKitty;
             parkingKitty = 0;
             console.log("Added " + oldKitty + " to player's account");
         } else if (parkingKitty <= 0){
@@ -1470,32 +1500,38 @@ var properties = {
     }
 
     function kittyFine(playerObj, val){
-        playerObj.capital -= val;
+        playerObj.money -= val;
         parkingKitty += val;
         console.log("Player fined. Money added to Kitty")
     }
+    */
 
-    function checkColourSetComplete(userObj, tileID){
+    function checkColourSetComplete(playerObj, tileID){
         //Checks if the player has all the properties in the tileID's colour set
         //Used for when the player wants to build a house on a property (tileID)
         var maxNumOfProps = properties[tileID].numberOfColours;
         
-        if(userObj.colours[properties[tileID].colour] == maxNumOfProps) {
+        /*if(userObj.colours[properties[tileID].colour] == maxNumOfProps) {
+            return true;
+        } else {
+            return false;
+        }*/ //changed
+        if(playerObj.properties[properties[tileID].colour].length == maxNumOfProps) {
             return true;
         } else {
             return false;
         }
     }
 
-    function buildHouses(userObj, tileID){
+    function buildHouses(playerObj, tileID){
         var costOfHouse = properties[tileID].houseValue;
     
-        if(checkColourSetComplete(userObj, tileID) && checkForNoMortgageInSet(userObj, tileID) && checkNumHousesInSet(userObj, tileID)) {
+        if(checkColourSetComplete(playerObj, tileID) && checkForNoMortgageInSet(playerObj, tileID) && checkNumHousesInSet(playerObj, tileID)) {
             //Player can only build a house if they have all properties of that colour, no property
             //of that colour is mortgaged, and they won't make a gap of more than 1 house between
             //the properties
-            if(userObj.capital >= costOfHouse) {
-                userObj.capital -= costOfHouse;
+            if(playerObj.money >= costOfHouse) {
+                playerObj.money -= costOfHouse;
                 properties[tileID].numberOfHouses++;
                 if(properties[tileID].numberOfHouses == 5) {
                     //Instead of a hotel flag we're simply saying the 5th house is a hotel
@@ -1520,8 +1556,13 @@ var properties = {
         //Checks that no property in a colour set (must be complete) is mortgaged
         //Used when the player wants to build a house on a property
         var propColour = properties[tileID].colour;
-        for(var i = 0; i < playerObj.colours[propColour]; i++) {
+        /*for(var i = 0; i < playerObj.colours[propColour]; i++) {
             if(properties[playerObj.ownedTilesByColour[propColour][i]].mortgaged) {
+                return false;
+            }
+        }*/ //changed
+        for(var i = 0; i < playerObj.properties[propColour].length; i++) {
+            if(properties[playerObj.properties[propColour][i]].mortgaged) {
                 return false;
             }
         }
@@ -1550,11 +1591,20 @@ var properties = {
         //greater than any other property in the same colour set. If it is it will create a gap
         //greater than 1 which is not allowed
         var propColour = properties[tileID].colour;
-        for(var i = 0; i < playerObj.colours[propColour]; i++) {
+        /*for(var i = 0; i < playerObj.colours[propColour]; i++) {
             if(playerObj.ownedTilesByColour[propColour][i] == tileID) {
                 continue;
             } else {
                 if(properties[tileID].numberOfHouses > properties[playerObj.ownedTilesByColour[propColour][i]].numberOfHouses) {
+                    return false;
+                }
+            }
+        }*/ //changed
+        for(var i = 0; i < playerObj.properties[propColour].length; i++) {
+            if(playerObj.properties[propColour][i] == tileID) {
+                continue;
+            } else {
+                if(properties[tileID].numberOfHouses > properties[playerObj.properties[propColour][i]].numberOfHouses) {
                     return false;
                 }
             }
@@ -1563,7 +1613,7 @@ var properties = {
     }
 
     function payRent(payer, payee, tileID) {
-        var capitalAvailable = payer.capital;
+        var capitalAvailable = payer.money;
         var rentDue;
     
         if(properties[tileID].type == "colour") {
@@ -1577,32 +1627,36 @@ var properties = {
             }
         } else if(properties[tileID].type == "railroad") {
             //Depending on how many railroads the player owns, the rent will be different
-            rentDue = properties[tileID].rent[payee.railroadsOwned];
+            //rentDue = properties[tileID].rent[payee.railroadsOwned]; //changed
+            rentDue = properties[tileID].rent[payee.properties["railroad"].length];
         } else if(properties[tileID].type == "utility") {
             //The rent is the dice roll * the number corresponding to the number of utilities owned
-            rentDue = currentRoll * properties[tileID].rent[payee.utilitiesOwned];
+            //rentDue = currentRoll * properties[tileID].rent[payee.utilitiesOwned]; //changed
+            rentDue = currentRoll * properties[tileID].rent[payee.properties["utilities"].length];
         }
 
         if(rentDue > capitalAvailable) {
             console.log("Allow to mortgage or bankrupt");
         } else {
             //This is where transactions come into play
-            payer.capital -= rentDue;
-            payee.capital += rentDue;
+            payer.money -= rentDue;
+            payee.money += rentDue;
             //console.log("Rent: " + rentDue);
-            alert(rentDue + " was paid in rent");
+            alert(rentDue + " was paid in rent to " + payee.name);
             //Add to owners account
         }
     }
 
+    /*
     function transactions(userObj, fee) {
         //Can use for both paying a player/taking money from a player
         if(fee < 0) {
             //Taking money from player
-            userObj.capital += fee;
+            userObj.money += fee;
             kitty -= fee
         }else if(fee > 0) {
-            userObj.capital += fee;
+            userObj.money += fee;
         }
     }
+    */
 })();
