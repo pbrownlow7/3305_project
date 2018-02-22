@@ -608,7 +608,7 @@ var properties = {
     var currentBidder;
     var currentBid;
     var auctionStarter;
-    var walkSound = new sound("bounce.mp3");
+    var walkSound;
 
     document.addEventListener("DOMContentLoaded", init, false);
 
@@ -741,7 +741,7 @@ var properties = {
         withdrawButton.addEventListener("click", withdrawClicked, false);
 
         document.getElementById("temp").disabled = true;
-        walkSound.play();
+        walkSound = document.getElementById("walkSound");
     }
 
     /*
@@ -1329,6 +1329,7 @@ var properties = {
             document.getElementById(newPosition).appendChild(playerObj.id);
             //Waiting for half a second so it looks nicer
             await sleep(500);
+            walkSound.play();
             if(newPosition == "0000") {
                 //console.log("Player has passed go; collect 200");
                 alert("Player has passed go; collect 200");
