@@ -61,11 +61,9 @@ function bankrupt(player, properties){
             }
           }
           else{
-              //Bankrupt owners properties go to bank 
-              //and are put up for auction
               for (propts in player.properties){
                 for (propts_name in props){
-                    new_player.properties.propts += propts_name;
+                    properties.propts.owner = null;
                     auction(player, propts_name);       
                 }
               }
@@ -74,11 +72,10 @@ function bankrupt(player, properties){
 	    console.log("You avoided bankruptcy!");
       }
     }
-    //If player loses connection
     if (player.connection){
         for (proprts in player.properties){
                 for (proprts_name in props){
-                    new_player.properties.proprts += proprts_name;
+                    properties.proprts.owner = null;
                     auction(player, proprts_name);       
                 }
         }
