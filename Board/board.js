@@ -608,6 +608,9 @@ var properties = {
     var currentBidder;
     var currentBid;
     var auctionStarter;
+    var walkSound;
+    var diceSound;
+    var jailDoorCloseSound;
 
     document.addEventListener("DOMContentLoaded", init, false);
 
@@ -651,6 +654,9 @@ var properties = {
     var pastaButton;
     var coffButton;
     var contButton;
+    var convButton;
+    var pizzaButton;
+    var bagButton;
 
     function init () {
         players.push(player("Player 1"));//document.getElementById ("player1"), "player1"));
@@ -686,6 +692,12 @@ var properties = {
         coffButton.addEventListener("click", coffPlacement, false);
         contButton = document.getElementById("contButt");
         contButton.addEventListener("click", contPlacement, false);
+        convButton = document.getElementById("convButt");
+        convButton.addEventListener("click", convPlacement, false);
+        pizzaButton = document.getElementById("pizzaButt");
+        pizzaButton.addEventListener("click", pizzaPlacement, false);
+        bagButton = document.getElementById("bagButt");
+        bagButton.addEventListener("click", bagPlacement, false);
         
         //;;;Can be deleted
         /*
@@ -731,6 +743,9 @@ var properties = {
         withdrawButton.addEventListener("click", withdrawClicked, false);
 
         document.getElementById("temp").disabled = true;
+        walkSound = document.getElementById("walkSound");
+        diceSound = document.getElementById("diceSound");
+        jailDoorCloseSound = document.getElementById("jailClose");
     }
 
     /*
@@ -932,6 +947,60 @@ var properties = {
         }
     }
 
+    function convPlacement() {
+        var node = document.createElement("img");
+        node.className = "player";
+        node.src = "images/shoes.png";
+        node.alt = "converse";
+        node.style.height = "40px";
+        node.style.width ="40px";
+        players[turn].id = node;
+        document.getElementById("convButt").disabled = true;
+        document.getElementById("convButt").style.opacity = 0.4;
+        if(turn == numPlayers-1) {
+            turn = 0;
+            startGame();
+        } else {
+            turn++;
+        }
+    }
+
+    function pizzaPlacement() {
+        var node = document.createElement("img");
+        node.className = "player";
+        node.src = "images/pizza.png";
+        node.alt = "pizza";
+        node.style.height = "35px";
+        node.style.width ="35px";
+        players[turn].id = node;
+        document.getElementById("pizzaButt").disabled = true;
+        document.getElementById("pizzaButt").style.opacity = 0.4;
+        if(turn == numPlayers-1) {
+            turn = 0;
+            startGame();
+        } else {
+            turn++;
+        }
+    }
+
+    function bagPlacement() {
+        var node = document.createElement("img");
+        node.className = "player";
+        node.src = "images/bag.png";
+        node.alt = "bagOfCansWithTheLads";
+        node.style.height = "35px";
+        node.style.width ="35px";
+        players[turn].id = node;
+        document.getElementById("bagButt").disabled = true;
+        document.getElementById("bagButt").style.opacity = 0.4;
+        if(turn == numPlayers-1) {
+            turn = 0;
+            startGame();
+        } else {
+            turn++;
+        }
+    }
+
     function startGame() {
         /*
         var bootEle = document.getElementById("bootButt");
@@ -957,6 +1026,12 @@ var properties = {
         coffEle.parentNode.removeChild(coffEle);
         var contEle = document.getElementById("contButt");
         contEle.parentNode.removeChild(contEle);
+        var convEle = document.getElementById("convButt");
+        convEle.parentNode.removeChild(convEle);
+        var pizzaEle = document.getElementById("pizzaButt");
+        pizzaEle.parentNode.removeChild(pizzaEle);
+        var bagEle = document.getElementById("bagButt");
+        bagEle.parentNode.removeChild(bagEle);
         for(var i = 0; i < numPlayers; i++) {
             document.getElementById("0000").appendChild(players[i].id);
         }
@@ -1150,7 +1225,11 @@ var properties = {
         return player;
     }
 
-    function normalRoll() {
+    async function normalRoll() {
+        diceSound.play();
+        await sleep(1000);
+        diceSound.currentTime = 0;
+        diceSound.pause();
         var ro = rollDice(); //Temporary variable to get the two dice rolls
         currentRoll = ro[0] + ro[1];
         diceRolled();
@@ -1210,7 +1289,7 @@ var properties = {
         }
     }
 
-    function    incrementTurn() {
+    function incrementTurn() {
         //Only increment if the player didn't roll a double
         if(!rolledDouble) {
             if(turn == numPlayers - 1) {
@@ -1258,6 +1337,7 @@ var properties = {
             document.getElementById(newPosition).appendChild(playerObj.id);
             //Waiting for half a second so it looks nicer
             await sleep(500);
+            walkSound.play();
             if(newPosition == "0000") {
                 //console.log("Player has passed go; collect 200");
                 alert("Player has passed go; collect 200");
@@ -1273,6 +1353,7 @@ var properties = {
     }
 
     function checkTile(playerPos) {
+        walkSound.pause();
         //console.log(playerPos);
         alert("Player position: " + playerPos);
         if(playerPos == "0010" || playerPos == "0000") {
@@ -1441,6 +1522,7 @@ var properties = {
         rolledDouble = false;
         //Putting the player in the jail tile (0010)
         document.getElementById(players[turn].position).appendChild(players[turn].id);
+        jailDoorCloseSound.play();
     }
 
     function checkForJailCard() {
