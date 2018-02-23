@@ -21,7 +21,7 @@
   }
   div {
       background-image: url('images/Board.jpg');
-  } 
+  }
 
   body {
     display:flex;
@@ -66,7 +66,7 @@
     padding: 15px;
     margin: 10px;
     border: 1px solid black;
-    border-radius: 5px;  
+    border-radius: 5px;
     font-size:18px;
     background-color: white;
     /*visibility: visible;
@@ -80,7 +80,7 @@
     padding: 15px;
     margin: 10px;
     border: 1px solid black;
-    border-radius: 5px;  
+    border-radius: 5px;
     font-size:18px;
     background-color: white;
     /*visibility: visible;
@@ -88,21 +88,21 @@
   }
 
   #goojf {
-    visibility: hidden; 
+    visibility: hidden;
     height: 75px;
     width: 150px;
     border: 2px solid black;
   }
 
   #goojfNo {
-    visibility: hidden; 
+    visibility: hidden;
     height: 75px;
     width: 150px;
     border: 2px solid black;
   }
 
   #buyOrAuction {
-    visibility: hidden; 
+    visibility: hidden;
     height: 75px;
     width: 150px;
     border: 2px solid black;
@@ -209,7 +209,7 @@
       justify-content:center;
       background-color: #ddf4df;
     }
-    
+
     table{
       border: 2px solid black;
       text-align: center;
@@ -221,7 +221,7 @@
       table-layout: fixed;
       resize: none;
     }
-    
+
     #board {
         background-image: url('images/Board.png');
         background-size: 700px 700px;
@@ -235,7 +235,7 @@
           margin: 0px;
           table-layout: fixed;
           resize: none;
-    
+
       }
       .player{
         width: 40px;
@@ -251,9 +251,9 @@
        /*border: 1px solid white;*/
        table-layout: fixed;
        resize: none;
-    
+
      }
-    
+
      .hor{
        width: 91px;
        height:55px;
@@ -263,8 +263,8 @@
        /*border: 1px solid white;*/
        table-layout: fixed;
        resize: none;
-    
-    
+
+
      }
 
         #dicePosition1 {
@@ -285,7 +285,7 @@
           width: 30px;
           height: 30px;
         }
-    
+
         #dicePosition2 {
           height: 30px;
           width: 30px;
@@ -299,35 +299,35 @@
           opacity: 0.0;
           /*font-size: 50px;*/
         }
-    
+
         #goojf {
           visibility: hidden;
           height: 75px;
           width: 150px;
           border: 2px solid black;
         }
-    
+
         #goojfNo {
           visibility: hidden;
           height: 75px;
           width: 150px;
           border: 2px solid black;
         }
-    
+
         #buyOrAuction {
           visibility: hidden;
           height: 75px;
           width: 150px;
           border: 2px solid black;
         }
-    
+
         #auctionWindow {
           visibility: hidden;
           height: 150px;
           width: 300px;
           border: 2px black solid;
         }
-    
+
         #bidder {
           visibility: hidden;
         }
@@ -339,35 +339,35 @@
           background-image: url('images/boot.png');
           background-size: 35px 35px;
         }
-      
+
         #carButt {
           height: 40px;
           width: 40px;
           background-image: url('images/car.png');
           background-size: 35px 35px;
         }
-      
+
         #hatButt {
           height: 40px;
           width: 40px;
           background-image: url('images/hat.png');
           background-size: 35px 35px;
         }
-      
+
         #shipButt {
           height: 40px;
           width: 40px;
           background-image: url('images/ship.png');
           background-size: 35px 35px;
         }
-      
+
         #barrButt {
           height: 40px;
           width: 40px;
           background-image: url('images/barrow.png');
           background-size: 35px 35px;
         }
-      
+
         #coneButt {
           height: 40px;
           width: 40px;
@@ -389,7 +389,7 @@
           background-image: url('images/Burrito.png');
           background-size: 35px 35px;
         }
-      
+
         #pastaButt {
           height: 40px;
           width: 40px;
@@ -435,7 +435,7 @@
         #iconChoices {
           position: absolute;
         }
-    
+
          .right{
            /* background-color: black;*/
            height: 56.5px;
@@ -447,8 +447,8 @@
            top: 0%;
            margin-left: 0px;
            z-index: 2
-    
-    
+
+
          }
          .left{
             /* background-color: black;*/
@@ -462,7 +462,7 @@
            top: 0%;
            margin-left: 0px;
            z-index: 2
-    
+
          }
          .top{
             /* background-color: black;*/
@@ -476,7 +476,7 @@
            resize: none;
            z-index: 2;
          }
-    
+
          .bottom{
            /* background-color: black;*/
            height: 20px;
@@ -489,7 +489,7 @@
            resize: none;
            z-index: 2;
          }
-    
+
     /*@import url(https://fonts.googleapis.com/css?family=Lato:100,400);
     #clock {
       background: #333;
