@@ -184,31 +184,33 @@ var communityChestArray = [
   ]
 
 function chance(playerPos,player){
-  var card = chanceArray.shift() // takes top card from array
-  chanceArray.push(card); // adds card to end of array
-
-  if (card.Id == 6 ){
+ var card = chanceArray.shift() // takes top card from array
+ chanceArray.push(card); // adds card to end of array
+ if (card.Id == 6 ){
      setJailCard();
  }
-
  else if (card.Id == 20 ){
-      alert(card.Name);
+      alert(card.Name); // advance to Go
       advance(card.Tile);
  }
-
  else if (card.Id == 8){
    alert(card.Name);
    placeInJail();
-
  }
  else if(card.Id== 19){
    // add go functionality
-    alert(card.Name);
-    advance(card.Tile);
+   alert(card.Name);  // Hillbillys  Done
+   if (players[turn].position == "0400"){
+     collect200();
+   }
+   advance(card.Tile);
  }
  else if(card.Id == 21){
-   // add go functionality
+   // add go functionality  Castle White Done
    alert(card.Name);
+   if (players[turn].position == "0400" ||players[turn].position == "1008"){
+     collect200();
+   }
    advance(card.Tile);
  }
  else if (card.Id == 17){
@@ -218,9 +220,11 @@ function chance(playerPos,player){
  else if(card.Id == 18){
    // add go functionality
    alert(card.Name);
-   advance(card.Tile); //  advances player to specific tile
+   if (players[turn].position == "0400" ||players[turn].position == "1008"){
+     collect200();
+   }
+   advance(card.Tile); //  advances player to Free Parking Done
  }
-
  else if(card.Id == 15){
     alert(card.Name)
     movePlayer(players[turn], 3, turn); // moves player forward 3 spaces
@@ -233,25 +237,24 @@ function chance(playerPos,player){
    // must calculate the amount of houses and hotels the player has.
    alert(card.Name);
    calcHouseHotels(card.Amount[0],card.Amount[1]); // calculates players houses and hotels
-}
-
+ }
  else if (card.Id == 14) {
    //need to add collect 200 as go was passed
    alert(card.Name);
 
    if(playerPos == "0007"){
-     document.getElementById("0510").appendChild(players[turn].id);
+     document.getElementById("0510").appendChild(players[turn].id); //advances to Cork Airport
    }
    else if(playerPos == "1008"){
-     document.getElementById("1005").appendChild(players[turn].id);
-
+     document.getElementById("1005").appendChild(players[turn].id); // advances to Bus station
    }
    else if(playerPos == "0400"){
-     document.getElementById("0005").appendChild(players[turn].id);
+     document.getElementById("0005").appendChild(players[turn].id); // advances taxi rank
+     collect200(); // collect 200 as player passed go
    }
  }
  else if (card.Id == 22) {
-   //need to add collect 200 as go was passed
+   // advances player to nearest utility
    alert(card.Name);
 
    if(playerPos == "0007"){
@@ -261,10 +264,16 @@ function chance(playerPos,player){
      document.getElementById("1002").appendChild(players[turn].id);
    }
    else if(playerPos == "0400"){
-     // collectGo()
      document.getElementById("0210").appendChild(players[turn].id);
+     collect200();
    }
  }
+}
+
+function collect200(){
+  players[turn].money += 200;
+  alert("Player Passed Go. Collect €200");
+  console.log(players[turn].money);
 }
 
 function communityChest(playerPos, player){
