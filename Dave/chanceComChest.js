@@ -1,37 +1,3 @@
-function checkTile(playerPos) {
-    //console.log(playerPos);
-    alert("Player position: " + playerPos);
-    if(playerPos == "0010" || playerPos == "0000") {
-        //This is the jail tile, do nothing
-    } else if(playerPos == "0007" || playerPos == "1008" || playerPos == "0400") {
-        //Player has landed on chance card
-        //console.log("Draw chance card");
-        //shuffle();
-        alert("Draw chance card");
-        chance(playerPos, player);
-    } else if(playerPos == "0002" || playerPos == "0710" || playerPos == "0700") {
-        //Player has landed on community chess
-        //console.log("Draw community chest card");
-        alert("Draw community chest card");
-        communityChest(playerPos, player);
-    } else if(playerPos == "1010") {
-        //Player has landed on Free Parking
-        //console.log("Free Parking");
-        alert("Free Parking");
-    } else if(playerPos == "1000") {
-        //Player is sent to jail
-        //console.log("Player is sent to jail");
-        alert("player is sent to jail");
-        placeInJail();
-    } else if(playerPos == "0004" || playerPos == "0200") {
-        //console.log("Player pays a tax");
-        alert("Player pays a tax");
-
-    } else {
-        isOwned(players[turn], playerPos);
-    }
-}
-
 var chanceArray = [
     {
     Name: "Get Out of Jail Free",
@@ -39,12 +5,12 @@ var chanceArray = [
     },
 
     {
-    Name: "Go directly to Jail – Do not pass Go, do not collect €200",
+    Name: "Go directly to Jail. Do not pass Go, do not collect 200",
     Id: 8,
     },
 
     {
-    Name: "Make general repairs on all your property. For each house pay €25. For each hotel €100",
+    Name: "Make general repairs on all your property. For each house pay 25. For each hotel 100",
     Id: 9,
     Amount: [25, 100] //25 is per house and 100 is per hotel
     },
@@ -76,25 +42,25 @@ var chanceArray = [
     },
 
     {
-    Name: "Advance to Free Parking – If you pass Go, collect €200",
+    Name: "Advance to Free Parking. If you pass Go, collect 200",
     Id: 18,
     Tile: "1010"
     },
 
     {
-    Name: "Advance to HillBillys – If you pass Go, collect €200",
+    Name: "Advance to HillBillys. If you pass Go, collect 200",
     Id: 19,
     Tile: "1006"
     },
 
     {
-    Name: "Advance to Go (Collect €200)",
+    Name: "Advance to Go (Collect 200)",
     Id: 20,
     Tile: "0000"
     },
 
     {
-    Name:"Advance to Castle White – If you pass Go, collect €200",
+    Name:"Advance to Castle White If you pass Go, collect 200",
     Id: 21,
     Tile: "0110"
     },
@@ -107,36 +73,30 @@ var chanceArray = [
 ]
 var communityChestArray = [
     {
-      Name: "You are assessed for street repairs. €40 per house, €115 per hotel",
-      Id: 9,
-      Amount: [40, 115] //40 is per house and 115 is per hotel
-    },
-
-    {
         Name: "Bank error in your favor. Collect 200",
         Id: 1,
         Amount: 200
     },
 
     {
-        Name: "Doctor's fees. Pay €50",
+        Name: "Doctor's fees. Pay 50",
         Id: 2,
         Amount: 50
     },
 
     {
-        Name:"From sale of stock you get €50",
+        Name:"From sale of stock you get 50",
         Id: 3,
         Amount: 50
     },
     {
-        Name: "Grand Opera Night, Collect €50 from every player for opening night seats",
+        Name: "Grand Opera Night, Collect 50 from every player for opening night seats",
         Id: 4,
         Amount: 50
     },
 
     {
-        Name: "Holiday Fund matures. Receive €100",
+        Name: "Holiday Fund matures. Receive 100",
         Id: 5,
         Amount: 100
     },
@@ -147,37 +107,40 @@ var communityChestArray = [
     },
 
     {
-        Name: "Income tax refund. Collect €25",
+        Name: "Income tax refund. Collect 25",
         Id: 7,
         Amount: 25
     },
 
     {
-        Name: " Go directly to jail. Do not pass Go. Do not collect €200",
+        Name: " Go directly to jail. Do not pass Go. Do not collect 200",
         Id: 8,
     },
-
-
     {
-        Name: "It is your birthday Collect €10 from each player ",
+      Name: "You are assessed for street repairs. 40 per house, 115 per hotel",
+      Id: 9,
+      Amount: [40, 115] //40 is per house and 115 is per hotel
+    },
+    {
+        Name: "It is your birthday Collect 10 from each player ",
         Id: 10,
         Amount: 10
     },
 
     {
-        Name: "Life insurance matures Collect €100",
+        Name: "Life insurance matures Collect 100",
         Id: 11,
         Amount: 100
     },
 
     {
-        Name: "Pay hospital fees of €100",
+        Name: "Pay hospital fees of 100",
         Id: 12,
         Amount: 100
     },
 
     {
-        Name: "Pay school fees of €150",
+        Name: "Pay school fees of 150",
         Id: 13,
         Amount: 150
     }
@@ -192,6 +155,8 @@ function chance(playerPos,player){
  else if (card.Id == 20 ){
       alert(card.Name); // advance to Go
       advance(card.Tile);
+      players[turn].position = card.Tile;
+      collect200();
  }
  else if (card.Id == 8){
    alert(card.Name);
@@ -204,18 +169,24 @@ function chance(playerPos,player){
      collect200();
    }
    advance(card.Tile);
+   players[turn].position = card.Tile;
+   isOwned(players[turn],card.Tile);
  }
  else if(card.Id == 21){
-   // add go functionality  Castle White Done
+   // add go functionality Castle White Done
    alert(card.Name);
    if (players[turn].position == "0400" ||players[turn].position == "1008"){
      collect200();
    }
    advance(card.Tile);
+   players[turn].position = card.Tile;
+   isOwned(players[turn],card.Tile);
  }
- else if (card.Id == 17){
+ else if (card.Id == 17){ //wgb
    alert(card.Name);
    advance(card.Tile);
+   players[turn].position = card.Tile;
+   isOwned(players[turn],card.Tile);
  }
  else if(card.Id == 18){
    // add go functionality
@@ -231,7 +202,7 @@ function chance(playerPos,player){
  }
  else if (card.Id == 16){
    alert(card.Name)
-   //movePlayer(player, 37, turn); need to create function that moves player back
+   //movePlayerBack();
  }
  else if (card.Id == 9 ){
    // must calculate the amount of houses and hotels the player has.
@@ -244,12 +215,18 @@ function chance(playerPos,player){
 
    if(playerPos == "0007"){
      document.getElementById("0510").appendChild(players[turn].id); //advances to Cork Airport
+     players[turn].position = "0510";
+     isOwned(players[turn],"0510");
    }
    else if(playerPos == "1008"){
      document.getElementById("1005").appendChild(players[turn].id); // advances to Bus station
+     players[turn].position = "0510";
+     isOwned(players[turn],"0510");
    }
    else if(playerPos == "0400"){
      document.getElementById("0005").appendChild(players[turn].id); // advances taxi rank
+     players[turn].position = "0510";
+     isOwned(players[turn],"0510");
      collect200(); // collect 200 as player passed go
    }
  }
@@ -259,20 +236,27 @@ function chance(playerPos,player){
 
    if(playerPos == "0007"){
      document.getElementById("0210").appendChild(players[turn].id);
+     players[turn].position = "0210";
+     isOwned(players[turn], "0210");
    }
    else if(playerPos == "1008"){
      document.getElementById("1002").appendChild(players[turn].id);
+     players[turn].position = "1002";
+     isOwned(players[turn],"1002");
    }
    else if(playerPos == "0400"){
      document.getElementById("0210").appendChild(players[turn].id);
+     players[turn].position = "0210";
+     isOwned(players[turn],"0210");
      collect200();
    }
  }
 }
+  //function movePlayerBack(){}
 
 function collect200(){
   players[turn].money += 200;
-  alert("Player Passed Go. Collect €200");
+  alert("Player Passed Go. Collect 200");
   console.log(players[turn].money);
 }
 
@@ -373,15 +357,15 @@ function playerCollect(amount){
   console.log(players);
 }
 
-function shuffles(){
+function shuffles(array){
   var i =0;
   var j = 0;
   var temp = null;
 
-  for(i = chanceArray.length-1;i>0;i-=1){
+  for(i = array.length-1;i>0;i-=1){
       j = Math.floor(Math.random()*(i+1));
-      temp=chanceArray[i];
-      chanceArray[i]=chanceArray[j];
-      chanceArray[j]=temp;
+      temp=array[i];
+      array[i]=array[j];
+      array[j]=temp;
   }
 }
