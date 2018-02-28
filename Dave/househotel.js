@@ -50,10 +50,12 @@ function placeHouse(tile){
    console.log(tileA);
  }
 }
-/* still working on this  --- needs to be tested --  Do NOT Integrate
+/* still working on this  --- needs to be tested --  Need most up to date board to test --  Try and Intergrate if you wish
+
 function removeHouse(tile){ // this function removes houses when mortgaging occurs
-  var parent = document.getElementById(tile);
-  if (properties[players[turn].position].numberOfHouses == 5){ // if there is a hotel you want the houses to reappear and the hotel to be removed
+  var tileA = tile + 'a';
+  var parent = document.getElementById(tileA);
+  if (properties[tile].numberOfHouses == 5){ // if there is a hotel you want the houses to reappear and the hotel to be removed
     parent.removeChild(parent.firstChild);
     for (var i= 0; i <= 3; i++){
        var hse = document.getElementById("houseImg");
