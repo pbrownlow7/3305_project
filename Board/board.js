@@ -589,6 +589,317 @@ var properties = {
     //End of Utilities
 };
 
+var chanceArray = [
+    {
+    Name: "Get Out of Jail Free",
+    Id: 6,
+    },
+
+    {
+    Name: "Go directly to Jail. Do not pass Go, do not collect 200",
+    Id: 8,
+    },
+
+    {
+    Name: "Make general repairs on all your property. For each house pay 25. For each hotel 100",
+    Id: 9,
+    Amount: [25, 100] //25 is per house and 100 is per hotel
+    },
+
+    {
+    Name: "Advance to nearest Travel Tile, paying owner twice the rent due. If Tile is unowned, you may buy it from the Bank",
+    Id: 14
+    },
+
+    {
+    Name: "Advance to nearest Travel Tile, paying owner twice the rent due. If Tile is unowned, you may buy it from the Bank",
+    Id: 14,
+    },
+
+    {
+    Name: "Move forward 3 spaces",
+    Id: 15,
+    },
+
+    {
+    Name: "Go Back 3 Spaces",
+    Id: 16,
+    },
+
+    {
+    Name: "Advance to the Western Gateway Building",
+    Id: 17,
+    Tile: "0100"
+    },
+
+    {
+    Name: "Advance to Free Parking. If you pass Go, collect 200",
+    Id: 17,//18,
+    Tile: "1010"
+    },
+
+    {
+    Name: "Advance to HillBillys. If you pass Go, collect 200",
+    Id: 17,//19,
+    Tile: "1006"
+    },
+
+    {
+    Name: "Advance to Go (Collect 200)",
+    Id: 17,//20,
+    Tile: "0000"
+    },
+
+    {
+    Name:"Advance to Castle White If you pass Go, collect 200",
+    Id: 17,//21,
+    Tile: "0110"
+    },
+
+    {
+    Name: "Advance token to the nearest Utility.",
+    Id: 22
+    },
+];
+
+var communityChestArray = [
+    {
+      Name: "You are assessed for street repairs. 40 per house, 115 per hotel",
+      Id: 9,
+      Amount: [40, 115] //40 is per house and 115 is per hotel
+    },
+
+    {
+        Name: "Bank error in your favor. Collect 200",
+        Id: 1,
+        Amount: 200
+    },
+
+    {
+        Name: "Doctor's fees. Pay 50",
+        Id: 2,
+        Amount: 50
+    },
+
+    {
+        Name:"From sale of stock you get 50",
+        Id: 3,
+        Amount: 50
+    },
+    {
+        Name: "Grand Opera Night, Collect 50 from every player for opening night seats",
+        Id: 4,
+        Amount: 50
+    },
+
+    {
+        Name: "Holiday Fund matures. Receive 100",
+        Id: 5,
+        Amount: 100
+    },
+
+    {
+        Name: "Get Out of Jail Free",
+        Id: 6,
+    },
+
+    {
+        Name: "Income tax refund. Collect 25",
+        Id: 7,
+        Amount: 25
+    },
+
+    {
+        Name: " Go directly to jail. Do not pass Go. Do not collect 200",
+        Id: 8,
+    },
+
+
+    {
+        Name: "It is your birthday Collect 10 from each player ",
+        Id: 10,
+        Amount: 10
+    },
+
+    {
+        Name: "Life insurance matures Collect 100",
+        Id: 11,
+        Amount: 100
+    },
+
+    {
+        Name: "Pay hospital fees of 100",
+        Id: 12,
+        Amount: 100
+    },
+
+    {
+        Name: "Pay school fees of 150",
+        Id: 13,
+        Amount: 150
+    }
+];
+
+function shuffles(array){
+    var i =0;
+    var j = 0;
+    var temp = null;
+  
+    for(i = array.length-1;i>0;i-=1){
+        j = Math.floor(Math.random()*(i+1));
+        temp=array[i];
+        array[i]=array[j];
+        array[j]=temp;
+    }
+}
+
+function getChanceCard() {
+    var card = chanceArray.shift();
+    chanceArray.push(card);
+    fadeCardOut(card, "chanceCard");
+}
+
+function chance(playerPos, player, card){
+    if (card.Id == 6 ){
+        setJailCard();
+        decideOnNextPlayer();
+    } else if (card.Id == 8){
+        placeInJail();
+    } else if (card.Id == 17) {
+        //Advances player to appropriate tile
+        advance(card.Tile, player);
+    } else if(card.Id == 15){
+        movePlayer(player, 3); // moves player forward 3 spaces
+    } else if (card.Id == 16){
+        moveBackwards(player, 3);
+    } else if (card.Id == 9 ){
+        // must calculate the amount of houses and hotels the player has.
+        calcHouseHotels(card.Amount[0],card.Amount[1]); // calculates players houses and hotels
+        decideOnNextPlayer();
+    } else if (card.Id == 14) {
+        doubleRentFromChance = true;
+        var playersLeft = parseInt(playerPos.substring(0, 2));
+        var playersRight = parseInt(playerPos.substring(2, 4));
+        var spaces;
+        if(playerPos == "0007") {
+            spaces = distanceCalculator("0510", playerPos);
+        } else if(playerPos == "1008") {
+            spaces = distanceCalculator("1005", playerPos);
+        } else if("0400") {
+            spaces = distanceCalculator("0005", playerPos);
+        }
+        movePlayer(players[turn], spaces);
+    } else if (card.Id == 22) {
+        // advances player to nearest utility
+        var shortest;
+        var utilDist1 = distanceCalculator("0210", playerPos);
+        var utilDist2 = distanceCalculator("1002", playerPos);
+        if(utilDist1 < utilDist2) {
+            shortest = utilDist1;
+        } else {
+            shortest = utilDist2;
+        }
+
+        movePlayer(player, shortest);
+    }
+}    
+
+function setJailCard(){
+    players[turn].jailCard = true;
+    alert("Player received Get out of Jail Free Card");
+}
+
+function calcHouseHotels(housePrice, hotelPrice) {
+    var houses = 0;
+    var hotels = 0;
+    var houseP = 0;
+    var hotelP = 0;
+    var cost;
+    for (var i = 0; i < players[turn].assets.length; i++){
+        // line below checks the current properties object for current players assets in which it can find number of houses
+        if (properties[players[turn].assets[i]].numberOfHouses == 5){
+            hotels += 1;
+        } else {
+            houses += properties[players[turn].assets[i]].numberOfHouses;
+        }
+    }
+    houseP = houses * housePrice;
+    hotelP = hotels * hotelPrice;
+    cost = houseP + hotelP;
+    alert('Total Houses: '+houses +', Total Hotels: '+hotels + ', Total Repairs Cost: '+cost);
+    //document.getElementById("endTurn").removeAttribute("disabled");
+    //comChestFine(cost);
+}
+
+function advance(tile, playerObj){
+    var spaces = distanceCalculator(tile, playerObj.position);
+    movePlayer(playerObj, spaces);
+    //document.getElementById(tile).appendChild(players[turn].id);
+}
+
+function getCommChestCard() {
+    var card = communityChestArray.shift(); // takes top card from array
+    //var card = communityChestArray[4];
+    communityChestArray.push(card);
+    fadeCardOut(card, "commChestCard");
+}
+
+async function communityChest(playerPos, player, card){
+    /*await sleep(500);
+    var card = communityChestArray.shift(); // takes top card from array
+    //var card = communityChestArray[4];
+    communityChestArray.push(card);  // adds card to end of array*/
+  
+    if (card.Id == 6){
+        setJailCard(); // player receives get out of jail free card
+        decideOnNextPlayer();
+    } else if (card.Id == 1 || card.Id == 3 || card.Id == 5 || card.Id == 7 || card.Id ==11) {
+        // community chest rewarding players
+        //alert(card.Name);
+        comChestCollect(card.Amount); // collect reward
+        decideOnNextPlayer();
+    } else if(card.Id == 2 || card.Id == 12 || card.Id == 13){
+        // community chest fining player players
+        //alert(card.Name);
+        comChestFine(card.Amount); // fined amount on card
+        decideOnNextPlayer();
+    } else if (card.Id == 8){
+        //go to jail card drawn from community chest
+        //alert(card.Name);
+        placeInJail(); // place player in jail
+    } else if (card.Id == 4 || card.Id == 10){
+        // must collect certain amount from each player
+        alert(card.Name + ', Amount Credited: '+ card.Amount * (players.length -1));
+        playerCollect(card.Amount); //collects amount stated on card from each player
+        decideOnNextPlayer();
+    } else if (card.Id == 9){
+        // calculate the amount of houses and hotels player has
+        //alert(card.Name);
+        calcHouseHotels(card.Amount[0],card.Amount[1]); // calculates players houses and hotels
+        decideOnNextPlayer();
+    }
+}
+
+function comChestCollect(amount){
+    players[turn].money += amount;
+}
+
+function comChestFine(amount){
+    players[turn].money -= amount;
+}
+
+function playerCollect(amount){
+    // collects amount from each player and adds to current player.
+    var collection = 0;
+    for(var i = 0; i < players.length; i++){
+        if(players[i] != players[turn]){
+            players[i].money -=amount;
+            collection += amount;
+        }
+    }
+    players[turn].money += collection;
+}
+
     var diceNumbers = {
         1: "images/dice1.png",
         2: "images/dice2.png",
@@ -603,18 +914,24 @@ var properties = {
     var currentRoll;
     var rolledDouble = false;
     var numPlayers;
-    var decidingOnProperty = false;
+    //var decidingOnProperty = false;
     var currentAuction = [];
     var currentBidder;
     var currentBid;
     var auctionStarter;
+    var doubleRentFromChance = false;
+
     var walkSound;
     var diceSound;
     var jailDoorCloseSound;
+    var buySound;
+    var hammerSound;
 
     document.addEventListener("DOMContentLoaded", init, false);
 
     var rollButton;
+    var endTurnButton;
+    var endTurnAllowed = true;
     
     //;;;Can be deleted
     /*
@@ -658,6 +975,10 @@ var properties = {
     var pizzaButton;
     var bagButton;
 
+    //Chance and commChest variables
+    var diagonalFadeOut;
+    var straightFadeOut;
+
     function init () {
         players.push(player("Player 1"));//document.getElementById ("player1"), "player1"));
         players.push(player("Player 2"));//document.getElementById ("player2"), "player2")); 
@@ -667,6 +988,7 @@ var properties = {
         //$("#player1").fadeOut();
         //$("#player1").fadeIn();
         rollButton = document.getElementById("temp");
+        endTurnButton = document.getElementById("endTurn");
 
         /*
         bootButton = document.getElementById("bootButt");
@@ -731,6 +1053,8 @@ var properties = {
         //;;;//
         
         rollButton.addEventListener("click", normalRoll, false);
+        endTurnButton.addEventListener("click", incrementTurn, false);
+
         useJailCardButton.addEventListener("click", useJailCardClicked, false);
         dontUseJailCardButton.addEventListener("click", dontUseJailCardClicked, false);
         payFineButton.addEventListener("click", payFineClicked, false);
@@ -742,11 +1066,316 @@ var properties = {
         bid100Button.addEventListener("click", bid100Clicked, false);
         withdrawButton.addEventListener("click", withdrawClicked, false);
 
-        document.getElementById("temp").disabled = true;
+        //document.getElementById("temp").disabled = true;
         walkSound = document.getElementById("walkSound");
         diceSound = document.getElementById("diceSound");
         jailDoorCloseSound = document.getElementById("jailClose");
+        buySound = document.getElementById("chaching");
+        hammerSound = document.getElementById("hammerSound");
+
+        shuffles(chanceArray);
+        shuffles(communityChestArray);
+
+        /*buy(players[0], "0003", properties["0003"].price);
+        properties["0003"].numberOfHouses = 3;
+        buy(players[0], "0001", properties["0001"].price);
+        properties["0001"].numberOfHouses = 5;*/
+
+        //document.getElementById("endTurn").removeAttribute("disabled");
+        document.getElementById("currTurn").innerHTML = "Player 1";
+
+        //Setting up the chance and commChest stuff
+        diagonalFadeOut = true;
+        straightFadeOut = true;
+
+        var chanceDiv = document.createElement("div");
+        chanceDiv.id = "chanceCard";
+        chanceDiv.style.backgroundColor = "orange";
+        chanceDiv.style.height = "90px";
+        chanceDiv.style.width = "140px";
+        chanceDiv.style.top = "25%";
+        chanceDiv.style.left = "42%";
+        chanceDiv.style.position = "absolute";
+        chanceDiv.style.borderRadius = "10px";
+        chanceDiv.style.transform = "rotate(-46deg)";
+        chanceDiv.style.opacity = "1.0";
+
+        var chanceHolder = document.createElement("div");
+        chanceHolder.id = "chanceHolder";
+        chanceHolder.style.backgroundColor = "black";
+        //fakeDiv.style.border = "solid orange";
+        chanceHolder.style.height = "90px";
+        chanceHolder.style.width = "140px";
+        chanceHolder.style.top = "25%";
+        chanceHolder.style.left = "42%";
+        chanceHolder.style.position = "absolute";
+        chanceHolder.style.borderRadius = "10px";
+        chanceHolder.style.transform = "rotate(-46deg)";
+
+        document.getElementById("body").appendChild(chanceHolder);
+        document.getElementById("body").appendChild(chanceDiv);
+
+        var chanceP = document.createElement("p");
+        chanceP.innerHTML = "CHANCE";
+        chanceP.id = "chanceP";
+        chanceP.style.position = "absolute";
+        chanceP.style.top = "25%";
+        chanceP.style.left = "25%";
+        document.getElementById("chanceCard").appendChild(chanceP);
+
+        var commChestDiv = document.createElement("div");
+        commChestDiv.id = "commChestCard";
+        commChestDiv.style.backgroundColor = "blue";
+        commChestDiv.style.height = "90px";
+        commChestDiv.style.width = "140px";
+        commChestDiv.style.top = "71%";
+        commChestDiv.style.left = "65%";
+        commChestDiv.style.position = "absolute";
+        commChestDiv.style.borderRadius = "10px";
+        commChestDiv.style.transform = "rotate(-46deg)";
+        commChestDiv.style.opacity = "1.0";
+
+        var commChestHolder = document.createElement("div");
+        commChestHolder.id = "commChestHolder";
+        commChestHolder.style.backgroundColor = "black";
+        commChestHolder.style.height = "90px";
+        commChestHolder.style.width = "140px";
+        commChestHolder.style.top = "71%";
+        commChestHolder.style.left = "65%";
+        commChestHolder.style.position = "absolute";
+        commChestHolder.style.borderRadius = "10px";
+        commChestHolder.style.transform = "rotate(-46deg)";
+
+        document.getElementById("body").appendChild(commChestHolder);
+        document.getElementById("body").appendChild(commChestDiv);
+
+        var commChestP = document.createElement("p");
+        var commChestP2 = document.createElement("p");
+        commChestP.innerHTML = "COMMUNITY";// CHEST";
+        commChestP.id = "commChestP";
+        commChestP.style.position = "absolute";
+        commChestP.style.top = "13%";
+        commChestP.style.left = "16%";
+        commChestP2.innerHTML = "CHEST";//;COMMUNITY CHEST";
+        commChestP2.id = "commChestP2";
+        commChestP2.style.position = "absolute";
+        commChestP2.style.top = "38%";
+        commChestP2.style.left = "32%";
+        document.getElementById("commChestCard").appendChild(commChestP);
+        document.getElementById("commChestCard").appendChild(commChestP2);
     }
+
+    //Start of chance animation stuff
+    function fadeCardOut(card, cardType) {
+        var intervalID = setInterval(function() {
+            var chanceOpacity = parseFloat(document.getElementById(cardType).style.opacity);
+            if(chanceOpacity > 0.0) {
+                chanceOpacity -= 0.1;
+                document.getElementById(cardType).style.opacity = chanceOpacity;
+            } else {
+                clearInterval(intervalID);
+                if(diagonalFadeOut) {
+                    //Must move chance card to the centre
+                    document.getElementById(cardType).style.height = "140px";
+                    document.getElementById(cardType).style.width = "220px";
+                    document.getElementById(cardType).style.top = "45%";
+                    document.getElementById(cardType).style.left = "48%";
+                    document.getElementById(cardType).style.transform = "none";
+                    if(cardType == "chanceCard") {
+                        document.getElementById("chanceP").style.top = "34%";
+                        document.getElementById("chanceP").style.left = "34%";
+                    } else {
+                        document.getElementById("commChestP").style.top = "25%";
+                        document.getElementById("commChestP").style.left = "25%";
+                        document.getElementById("commChestP2").style.top = "40%";
+                        document.getElementById("commChestP2").style.left = "37%";
+                    }
+                } else if(straightFadeOut) {
+                    //Must move chance card to the origin
+                    document.getElementById(cardType).style.height = "90px";
+                    document.getElementById(cardType).style.width = "140px";
+                    document.getElementById(cardType).style.top = "71%";
+                    document.getElementById(cardType).style.left = "65%";
+                    document.getElementById(cardType).style.transform = "rotate(-46deg)";
+                    if(cardType == "chanceCard") {
+                        document.getElementById(cardType).style.top = "25%";
+                        document.getElementById(cardType).style.left = "42%";
+                        document.getElementById("chanceP").style.top = "25%";
+                        document.getElementById("chanceP").style.left = "25%";
+                    } else {
+                        document.getElementById(cardType).style.top = "71%";
+                        document.getElementById(cardType).style.left = "65%";
+                        document.getElementById("commChestP").style.top = "13%";
+                        document.getElementById("commChestP").style.left = "16%";
+                        document.getElementById("commChestP2").style.top = "38%";
+                        document.getElementById("commChestP2").style.left = "32%";
+                    }
+                }
+                fadeCardIn(card, cardType);
+            }
+        }, 50);
+    }
+
+    function fadeCardIn(card, cardType) {
+        var intervalID = setInterval(function() {
+            var chanceOpacity = parseFloat(document.getElementById(cardType).style.opacity);
+            if(chanceOpacity < 1.0) {
+                chanceOpacity += 0.1;
+                document.getElementById(cardType).style.opacity = chanceOpacity;
+            } else {
+                clearInterval(intervalID);
+                if(diagonalFadeOut) {
+                    if(cardType == "chanceCard") {
+                        chanceP = document.getElementById("chanceP");
+                        document.getElementById(cardType).removeChild(chanceP);
+                    } else {
+                        commchestP = document.getElementById("commChestP");
+                        commchestP2 = document.getElementById("commChestP2");
+                        document.getElementById(cardType).removeChild(commchestP);
+                        document.getElementById(cardType).removeChild(commchestP2);
+                    }
+                    revealCard(card, cardType);
+                    diagonalFadeOut = false;
+                    straightFadeOut = true;
+                } else if(straightFadeOut) {
+                    straightFadeOut = false;
+                    diagonalFadeOut = true;
+                    if(cardType == "chanceCard") {
+                        chance(players[turn].position, players[turn], card);
+                    } else {
+                        communityChest(players[turn].position, players[turn], card);
+                    }
+                }
+            }
+        }, 50);
+    }
+
+    function revealCard(card, cardType) {
+        var moveUp = true;
+        var moveDown = false;
+        var intervalID = setInterval(function() {
+            var height = document.getElementById(cardType).style.height;
+            heightNum = parseInt(height.substring(0, height.length-2));
+            if(moveUp) {
+                if(heightNum > 0) {
+                    heightNum -= 5;
+                } else {
+                    moveUp = false;
+                    moveDown = true;
+                }
+                document.getElementById(cardType).style.height = heightNum + "px";
+            } else if(moveDown) {
+                if(heightNum < 140) {
+                    heightNum += 5;
+                } else {
+                    moveDown = false;
+                }
+                document.getElementById(cardType).style.height = heightNum + "px";
+            } else {
+                var divRight = document.createElement("div");
+                divRight.id = "divRight";
+                divRight.style.position = "absolute";
+                divRight.style.right = "0";
+                divRight.style.height = "70px";
+                divRight.style.width = "70px";
+                divRight.style.top = "25%";
+                var divLeft = document.createElement("div");
+                divLeft.id = "divLeft";
+                divLeft.style.position = "absolute";
+                divLeft.style.left = "0";
+                divLeft.style.height = "110px";
+                divLeft.style.width = "140px";
+                divLeft.style.top = "10%";
+                var pCent = document.createElement("center");
+                pCent.id = "pCent";
+                var pLeft = document.createElement("p");
+                pLeft.id = "desc";
+                pLeft.style.fontSize = "14px";
+                pLeft.innerHTML = card.Name;//"Advance to nearest Travel Tile, paying owner twice the rent due. If Tile is unowned, you may buy it from the Bank";
+                var pic = document.createElement("img");
+                pic.id = "pic";
+                pic.src = "images/ship.png";
+                pic.style.width = "70px";
+                pic.style.height = "70px";
+                document.getElementById(cardType).appendChild(divRight);
+                document.getElementById(cardType).appendChild(divLeft);
+                document.getElementById("divLeft").appendChild(pCent);
+                document.getElementById("pCent").appendChild(pLeft);
+                document.getElementById("divRight").appendChild(pic);
+                var okButton = document.createElement("button");
+                okButton.id = "ok";
+                okButton.innerHTML = "OK";
+                okButton.style.position = "absolute";
+                okButton.style.left = "40%";
+                document.getElementById(cardType).appendChild(okButton);
+                okButton.addEventListener("click", reflipCard.bind(null, card, cardType), false);
+                clearInterval(intervalID);
+            }
+        }, 16);
+    }
+
+    function reflipCard(card, cardType) {
+        var moveUp = true;
+        var moveDown = false;
+        straightFadeOut = true;
+
+        var divRight = document.getElementById("divRight");
+        var divLeft = document.getElementById("divLeft");
+        var okButton = document.getElementById("ok");
+        document.getElementById(cardType).removeChild(okButton);
+        document.getElementById(cardType).removeChild(divLeft);
+        document.getElementById(cardType).removeChild(divRight);
+
+        var intervalID = setInterval(function() {
+            var height = document.getElementById(cardType).style.height;
+            heightNum = parseInt(height.substring(0, height.length-2));
+            if(moveUp) {
+                if(heightNum > 0) {
+                    heightNum -= 5;
+                } else {
+                    moveUp = false;
+                    moveDown = true;
+                }
+                document.getElementById(cardType).style.height = heightNum + "px";
+            } else if(moveDown) {
+                if(heightNum < 140) {
+                    heightNum += 5;
+                } else {
+                    moveDown = false;
+                }
+                document.getElementById(cardType).style.height = heightNum + "px";
+            } else {
+                if(cardType == "chanceCard") {
+                    var chanceP = document.createElement("p");
+                    chanceP.innerHTML = "CHANCE";
+                    chanceP.id = "chanceP";
+                    chanceP.style.position = "absolute";
+                    chanceP.style.top = "34%";
+                    chanceP.style.left = "34%";
+                    document.getElementById(cardType).appendChild(chanceP);
+                    clearInterval(intervalID);
+                } else {
+                    var commChestP = document.createElement("p");
+                    var commChestP2 = document.createElement("p");
+                    commChestP.innerHTML = "COMMUNITY";
+                    commChestP.id = "commChestP";
+                    commChestP.style.position = "absolute";
+                    commChestP.style.top = "25%";
+                    commChestP.style.left = "25%";
+                    commChestP2.innerHTML = "CHEST";
+                    commChestP2.id = "commChestP2";
+                    commChestP2.style.position = "absolute";
+                    commChestP2.style.top = "40%";
+                    commChestP2.style.left = "37%";
+                    document.getElementById(cardType).appendChild(commChestP);
+                    document.getElementById(cardType).appendChild(commChestP2);
+                    clearInterval(intervalID);
+                }
+                fadeCardOut(card, cardType);
+            }
+        }, 16);
+    }
+    //End of chance animation stuff
 
     /*
     function bootPlacement() {
@@ -862,8 +1491,9 @@ var properties = {
         node.className = "player";
         node.src = "images/can.png";
         node.alt = "can";
-        //node.style.height = "25px";
-        //node.style.width ="25px";
+        node.style.height = "25px";
+        node.style.width ="25px";
+        node.style.zIndex = 1;
         players[turn].id = node;
         document.getElementById("canButt").disabled = true;
         document.getElementById("canButt").style.opacity = 0.4;
@@ -880,8 +1510,9 @@ var properties = {
         node.className = "player";
         node.src = "images/Burrito.png";
         node.alt = "burrito";
-        //node.style.height = "25px";
-        //node.style.width ="25px";
+        node.style.height = "25px";
+        node.style.width ="25px";
+        node.style.zIndex = 2;
         players[turn].id = node;
         document.getElementById("burrButt").disabled = true;
         document.getElementById("burrButt").style.opacity = 0.4;
@@ -898,8 +1529,9 @@ var properties = {
         node.className = "player";
         node.src = "images/pasta.png";
         node.alt = "pasta";
-        node.style.height = "40px";
-        node.style.width ="50px";
+        node.style.height = "30px";
+        node.style.width ="40px";
+        node.style.zIndex = 3;
         players[turn].id = node;
         document.getElementById("pastaButt").disabled = true;
         document.getElementById("pastaButt").style.opacity = 0.4;
@@ -916,8 +1548,9 @@ var properties = {
         node.className = "player";
         node.src = "images/Coffee.png";
         node.alt = "coffee";
-        node.style.height = "40px";
-        node.style.width ="40px";
+        node.style.height = "24px";
+        node.style.width = "24px";
+        node.style.zIndex = 4;
         players[turn].id = node;
         document.getElementById("coffButt").disabled = true;
         document.getElementById("coffButt").style.opacity = 0.4;
@@ -1035,7 +1668,8 @@ var properties = {
         for(var i = 0; i < numPlayers; i++) {
             document.getElementById("0000").appendChild(players[i].id);
         }
-        document.getElementById("temp").disabled = false;
+        //document.getElementById("temp").disabled = false;
+        document.getElementById("temp").removeAttribute("disabled");
     }
 
     
@@ -1048,24 +1682,29 @@ var properties = {
     //;;;//
 
     async function diceFadeIn(num1, num2) {
-        document.getElementById("temp").disabled = true;
-        for(var x = 0; x <= 1; x += 0.1) {
+        //document.getElementById("temp").disabled = true;
+        document.getElementById("dicePosition1").style.opacity = 1.0;
+        document.getElementById("dicePosition2").style.opacity = 1.0;
+        /*for(var x = 0; x <= 1; x += 0.1) {
             document.getElementById("dicePosition1").style.opacity = x;
             document.getElementById("dicePosition2").style.opacity = x;
             await sleep(100);
-        }
+        }*/
     }
 
     async function diceFadeOut() {
-        for(var i = 0.9; i >= 0; i -= 0.1) {
+        document.getElementById("dicePosition1").style.opacity = 0.0;
+        document.getElementById("dicePosition2").style.opacity = 0.0;
+        /*for(var i = 0.9; i >= 0; i -= 0.1) {
             document.getElementById("dicePosition1").style.opacity = i;
             document.getElementById("dicePosition2").style.opacity = i;
             await sleep(100);
-        }
-        if(!decidingOnProperty) {
-            document.getElementById("temp").disabled = false;
-            incrementTurn();
-        }
+        }*/
+        //if(!decidingOnProperty) {
+            //document.getElementById("temp").disabled = false;
+            //console.log("here");
+            //incrementTurn();
+        //}
     }
 
     function useJailCardClicked() {
@@ -1087,7 +1726,7 @@ var properties = {
         normalRoll();
     }
 
-    async function attemptDoubleClicked() {
+    function attemptDoubleClicked() {
         document.getElementById("goojfNo").style.visibility = "hidden";
         var doubleAttempt = rollDice();
         if(rolledDouble) {
@@ -1095,23 +1734,31 @@ var properties = {
             releaseFromJail();
             diceRolled();
         } else {
-            await sleep(1000);
-            diceFadeOut();
+            //await sleep(500);
+            //diceFadeOut();
+            decideOnNextPlayer();
         }
     }
 
     function buyPropertyClicked() {
         document.getElementById("buyOrAuction").style.visibility = "hidden";
         buy(players[turn], players[turn].position, properties[players[turn].position].price);
-        decidingOnProperty = false;
-        document.getElementById("temp").disabled = false;
-        incrementTurn();
+        endTurnAllowed = true;
+        decideOnNextPlayer();
+        //document.getElementById("endTurn").removeAttribute("disabled");
+        //decidingOnProperty = false;
+        //document.getElementById("temp").disabled = false;
+        //incrementTurn();
     }
 
-    function auctionPropertyClicked() {
+    async function auctionPropertyClicked() {
         //Wipe the dictionary in case any palyers hvae been eliminated from the game
         //The first element of currentAuction is the number of players left
         //The second element is the tile to be auctioned
+        hammerSound.play();
+        await sleep(2000);
+        hammerSound.currentTime = 0;
+        hammerSound.pause();
         auctionStarter = players[turn];
         currentAuction = [0, players[turn].position];
         if(turn == numPlayers-1) {
@@ -1196,36 +1843,11 @@ var properties = {
         player.jail.jailRoll = 0;
         player.jail.justReleased = false;
 
-        /*player.jailCard = false;
-        player.jail = {
-            jailTag: false,
-            jailRoll: 0,
-            justReleased: false //Set to true if they have just been released from jail
-        };
-        player.colours = {
-            "brown": 0,
-            "lightblue": 0,
-            "pink": 0,
-            "yellow": 0,
-            "orange": 0,
-            "red": 0,
-            "green": 0,
-            "blue": 0
-        };
-        player.ownedTilesByColour = {
-            "brown": [],
-            "light blue": [],
-            "pink": [],
-            "yellow": [],
-            "orange": [],
-            "red": [],
-            "green": [],
-            "blue": []
-        };*/
         return player;
     }
 
     async function normalRoll() {
+        document.getElementById("temp").setAttribute("disabled", "disabled");
         diceSound.play();
         await sleep(1000);
         diceSound.currentTime = 0;
@@ -1272,48 +1894,74 @@ var properties = {
             players[turn].jail.justReleased = false;
         }
         //Check for doubles
-        if(rolledDouble) {
-            players[turn].doublesRolled++
+        if(rolledDouble && players[turn].doublesRolled == 2) {
+            /*
+            * If they've rolled a double with two already rolled they go to jail
+            */
+            //players[turn].doublesRolled++
+            alert("Player was place in jail");
+            placeInJail();
+            //diceFadeOut();
         } else {
+            //Move the player
+            movePlayer(players[turn], currentRoll);
+        }
+        
+        /*else {
             //They didn't roll a double so they don't get to roll again
             players[turn].doublesRolled = 0;
-        }
+        }*/
             
         //Move the player
-        if(players[turn].doublesRolled == 3) {
+        /*if(players[turn].doublesRolled == 3) {
             placeInJail();
             await sleep(1000);
             diceFadeOut();
         } else {
             movePlayer(players[turn], currentRoll, turn);
-        }
+        }*/
     }
 
     function incrementTurn() {
         //Only increment if the player didn't roll a double
-        if(!rolledDouble) {
+        diceFadeOut();
+        players[turn].doublesRolled = 0;
+        console.log(turn);
+        if(turn == numPlayers - 1) {
+            turn = 0;
+        } else {
+            turn++;
+        }
+        document.getElementById("endTurn").setAttribute("disabled", "disabled");
+        /*if(!rolledDouble) {
             if(turn == numPlayers - 1) {
                 turn = 0;
             } else {
                 turn++;
             }
-        }
+        }*/
+        console.log(turn);
+        var nextPlay = turn+1;
+        document.getElementById("currTurn").innerHTML = "Player " + nextPlay;
         
         //Check if player is in jail here so that if the player is in jail the prompt for either
         //using their jailCard if they have one or to pay fine or roll for a double is automatically
         //shown without them having to click anything
         if(players[turn].jail.jailTag) {
+            players[turn].jail.jailRoll++;
             checkForJailCard();
         } else {
+            document.getElementById("temp").removeAttribute("disabled");
+        }/* else {
             /*
             * Put a timer here maybe for the length of time the player has to roll until
             * it automatically does it for them
-            */
-        }
+            *
+        }*/
     }
 
     //The async keyword has to be used when the await() function is used
-    async function movePlayer(playerObj, spacesToMove, turn) {
+    async function movePlayer(playerObj, spacesToMove) {//, turn) {
         //Gets first two numbers in the id
         var left = parseInt(playerObj.position.substring(0, 2));
         //Gets the last two numbers in the id
@@ -1337,7 +1985,7 @@ var properties = {
             document.getElementById(newPosition).appendChild(playerObj.id);
             //Waiting for half a second so it looks nicer
             await sleep(500);
-            walkSound.play();
+            //walkSound.play();
             if(newPosition == "0000") {
                 //console.log("Player has passed go; collect 200");
                 alert("Player has passed go; collect 200");
@@ -1349,52 +1997,122 @@ var properties = {
         //Checking for what tile they land on, currently only says "This tile is x, etc", Sean
         //and Dave are working on that I believe
         checkTile(newPosition);
-        diceFadeOut();
+        //if(decidingOnProperty) {
+        //diceFadeOut();
+        //}
+    }
+
+    function decideOnNextPlayer() {
+        if(endTurnAllowed) {
+            if(!rolledDouble) {
+                document.getElementById("endTurn").removeAttribute("disabled");
+            } else {
+                playerRolledDouble();
+            }
+        }
+    }
+
+    async function moveBackwards(playerObj, spacesToMove) {
+        var newPosition;
+        //Gets first two numbers in the id
+        var left = parseInt(playerObj.position.substring(0, 2));
+        //Gets the last two numbers in the id
+        var right = parseInt(playerObj.position.substring(2, 4));
+        while(spacesToMove > 0) {
+            if(left == 0 && right > 0) {
+                right--;
+            } else if(right == 10 && left > 0) {
+                left--;
+            } else if(left == 10 && right >= 0) {
+                right++;
+            } else if(right == 0 && left >= 0) {
+                left++;
+            }
+            newPosition = positionHack(left, right);
+            spacesToMove--;
+            document.getElementById(newPosition).appendChild(playerObj.id);
+            await sleep(500);
+        }
+        playerObj.position = newPosition;
+        checkTile(newPosition);
+        //decidingOnProperty = false;
+        //document.getElementById("temp").disabled = false;
+        //incrementTurn();
     }
 
     function checkTile(playerPos) {
+        //decidingOnProperty = true;
         walkSound.pause();
         //console.log(playerPos);
         alert("Player position: " + playerPos);
         if(playerPos == "0010" || playerPos == "0000") {
+            decideOnNextPlayer();
             //This is the jail tile, do nothing
         } else if(playerPos == "0007" || playerPos == "1008" || playerPos == "0400") {
             //Player has landed on chance card
             //console.log("Draw chance card");
+            //decidingOnProperty = true;
             alert("Draw chance card");
+            getChanceCard();
         } else if(playerPos == "0002" || playerPos == "0710" || playerPos == "0700") {
             //Player has landed on community chess
             //console.log("Draw community chest card");
             alert("Draw community chest card");
+            getCommChestCard();
         } else if(playerPos == "1010") {
             //Player has landed on Free Parking
             //console.log("Free Parking");
             alert("Free Parking");
+            decideOnNextPlayer();
         } else if(playerPos == "1000") {
             //Player is sent to jail
             //console.log("Player is sent to jail");
             alert("player is sent to jail");
+            placeInJail();
+            //decideOnNextPlayer();
         } else if(playerPos == "0004" || playerPos == "0200") {
             //console.log("Player pays a tax");
             alert("Player pays a tax");
+            decideOnNextPlayer();
         } else { 
             isOwned(players[turn], playerPos);
         }
+
+        //Will probably have to put this somewhere else
+        /*if(endTurnAllowed) {
+            if(!rolledDouble) {
+                document.getElementById("endTurn").removeAttribute("disabled");
+            } else {
+                playerRolledDouble();
+            }
+        }*/
     }
 
-    async function isOwned(playerObj, tileID) {
+    function playerRolledDouble() {
+        document.getElementById("temp").removeAttribute("disabled");
+        players[turn].doublesRolled++;
+    }
+
+    function isOwned(playerObj, tileID) {
+        endTurnAllowed = false;
         //Checking if the tile landed on play 'playr' is owned or naw
         if(properties[tileID].owner == null) {
-            decidingOnProperty = true;
+            //decidingOnProperty = true;
             //Buy or Auction GUI visible
-            await sleep(1200); //Have to wait so the dice fade out and don't break the game
+            //await sleep(1200); //Have to wait so the dice fade out and don't break the game
             document.getElementById("buyOrAuction").style.visibility = "visible";
-        } else if(properties[tileID].owner != players[turn]) { //Took out .id here on both
-            payRent(playerObj, properties[tileID].owner, tileID);
+        } else {
+            if(properties[tileID].owner != players[turn]) { //Took out .id here on both
+                payRent(playerObj, properties[tileID].owner, tileID);
+            }
+            endTurnAllowed = true;
+            decideOnNextPlayer();
+            //document.getElementById("endTurn").removeAttribute("disabled");
+            //endTurnAllowed = true;
         }
     }
 
-    function buy(playerObj, tileID, amount) {
+    async function buy(playerObj, tileID, amount) {
         playerObj.money -= amount;//properties[tileID].price; //;;;Will be done properly by Donn
         properties[tileID].owner = playerObj;//players.indexOf(playerObj);
         playerObj.assets.push(tileID);
@@ -1410,6 +2128,10 @@ var properties = {
             //playerObj.utilitiesOwned++; //changed
             playerObj.properties["utilities"].push(tileID);
         }
+        buySound.play();
+        await sleep(750);
+        buySound.currentTime = 0;
+        buySound.pause();
         //console.log(playerObj.name + " " + playerObj.capital);
         console.log(players[turn].properties);
         console.log(players[turn].assets);
@@ -1455,10 +2177,15 @@ var properties = {
         buy(players[currentBidder-2], currentAuction[1], currentBid);
         document.getElementById("auctionWindow").style.visibility = "hidden";
         document.getElementById("bidder").style.visibility = "hidden";
-        document.getElementById("temp").disabled = false;
-        decidingOnProperty = false;
+        //document.getElementById("temp").disabled = false;
+        //decidingOnProperty = false;
+        endTurnAllowed = true;
         turn = players.indexOf(auctionStarter);
-        incrementTurn();
+        decideOnNextPlayer();
+        //if(!rolledDouble) {
+            document.getElementById("endTurn").removeAttribute("disabled");
+        //}
+        //incrementTurn();
     }
 
     function findBidder() {
@@ -1512,7 +2239,7 @@ var properties = {
         auctionChecker();
     }
 
-    function placeInJail() {
+    async function placeInJail() {
         //Setting all the appropriate flags for being in jail. Must reset all the vairables to
         //do with rolling a double and the player being released
         players[turn].jail.jailTag = true;
@@ -1523,6 +2250,8 @@ var properties = {
         //Putting the player in the jail tile (0010)
         document.getElementById(players[turn].position).appendChild(players[turn].id);
         jailDoorCloseSound.play();
+        await sleep(1000);
+        document.getElementById("endTurn").removeAttribute("disabled");
     }
 
     function checkForJailCard() {
@@ -1535,7 +2264,7 @@ var properties = {
             //Jail Card HTML element needs to be set to visible and the Normal Roll button needs
             //to be disabled
             document.getElementById("goojf").style.visibility = "visible";
-            document.getElementById("temp").disabled = false;
+            //document.getElementById("temp").disabled = false;
         } else {
             //If they don't have a jailCard then the normal jail procedure is run
             jail();
@@ -1550,9 +2279,9 @@ var properties = {
         var diceRollInJail;
 
         //Have to disable the Normal Roll button, as the dice roll will be controlled by the GUI
-        document.getElementById("temp").disabled = true;
+        //document.getElementById("temp").disabled = true;
         //Increment the number of turns the player has been in jail immediately (before they roll)
-        players[turn].jail.jailRoll++;
+        //players[turn].jail.jailRoll++;
 
         //If they have been in jail for 3 turns, they cannot attempt to roll a double and the dice
         //is rolled for them automatically
@@ -1624,8 +2353,8 @@ var properties = {
         var num1 = Math.floor(Math.random() * 6) + 1;
         var num2 = Math.floor(Math.random() * 6) + 1;
 
-        //num1 = 3;
-        //num2 = 2;
+        //num1 = 1;//parseInt(document.getElementById("dOne").value);
+        //num2 = 1;//parseInt(document.getElementById("dTwo").value);
         
         //;;;
         /*
@@ -1738,13 +2467,17 @@ var properties = {
                 playerObj.money -= costOfHouse;
                 properties[tileID].numberOfHouses++;
                 if(properties[tileID].numberOfHouses == 5) {
+                    placeHouse(tileID);
+                    properties[tileID].numberOfHouses++;
                     //Instead of a hotel flag we're simply saying the 5th house is a hotel
                     //console.log("The player has built a hotel on " + properties[tileID].name);
-                    alert("The player has built a hotel on " + properties[tileID].name);
+                    //alert("The player has built a hotel on " + properties[tileID].name);
                 } else {
+                    placeHouse(tileID);
+                    properties[tileID].numberOfHouses++;
                     //console.log("The player has built a house on " + properties[tileID].name);
                     //console.log("The player has " + properties[tileID].numberOfHouses + " houses here");
-                    alert("The player has built a house (" + properties[tileID].numberOfHouses + "/4) on " + properties[tileID].name);
+                    //alert("The player has built a house (" + properties[tileID].numberOfHouses + "/4) on " + properties[tileID].name);
                 }
             } else {
                 //console.log("Player does not have enough money to build house");
@@ -1753,6 +2486,25 @@ var properties = {
         } else {
             //console.log("player cannot place house here");
             alert("Player does not have a monopoly in this colour set");
+        }
+    }
+
+    function placeHouse(tileID) {
+        // this function is used to place house on board ---- NOT COMPLETE ----
+        var tileA = tileID.concat("a");// +'a';
+        if (properties[tileID].numberOfHouses <= 4) {
+            var hse = document.getElementById("houseImg");
+            var cln = hse.cloneNode(true);
+            document.getElementById(tileA).appendChild(cln);
+            console.log(tileA);
+        } else {
+            var htl = document.getElementById("hotelImg"); // places a hotel
+            var parent = document.getElementById(tileA);
+            while (parent.firstChild) { // remove houses from tile
+                parent.removeChild(parent.firstChild);
+            }
+            parent.appendChild(htl); // appends Hotel to tile
+            console.log(tileA);
         }
     }
 
@@ -1833,6 +2585,10 @@ var properties = {
             //Depending on how many railroads the player owns, the rent will be different
             //rentDue = properties[tileID].rent[payee.railroadsOwned]; //changed
             rentDue = properties[tileID].rent[payee.properties["railroad"].length];
+            if(doubleRentFromChance) {
+                rentDue *= 2;
+                doubleRentFromChance = false;
+            }
         } else if(properties[tileID].type == "utility") {
             //The rent is the dice roll * the number corresponding to the number of utilities owned
             //rentDue = currentRoll * properties[tileID].rent[payee.utilitiesOwned]; //changed
@@ -1863,4 +2619,37 @@ var properties = {
         }
     }
     */
+
+    function distanceCalculator(tileOne, tileTwo) {
+        //Calculates the distance between two tiles
+        //var t1 = tileToPosition(tileOne);
+        //var t2 = tileToPosition(tileTwo);
+        var distance = tileToPosition(tileOne) - tileToPosition(tileTwo);
+        //console.log(t1);
+        //console.log(t2);
+        /*if(t2 > t1) {
+            distance = (40 - t2) + t1;
+        } else {
+            distance = t1 - t2;
+        }*/
+        if(distance < 0) {
+            distance += 40;
+        }
+        return distance;
+    }
+
+    function tileToPosition(tileID) {
+        //Converts tileID into its corresponding position in the made up array
+        var arrayIndex;
+        //Gets first two numbers in the id
+        var left = parseInt(tileID.substring(0, 2));
+        //Gets the last two numbers in the id
+        var right = parseInt(tileID.substring(2, 4));
+        if(left <= right) {
+            arrayIndex = left + right;
+        } else {
+            arrayIndex = 40 - (left + right);
+        }
+        return arrayIndex;
+    }
 })();

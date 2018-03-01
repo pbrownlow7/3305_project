@@ -198,6 +198,13 @@
       width: 52px;
       height:89px;
     }*/
+    #dOne {
+      width: 20px;
+    }
+
+    #dTwo {
+      width: 20px;
+    }
 
     body {
       display:flex;
@@ -264,6 +271,7 @@
      }
 
         #dicePosition1 {
+          /*visibility: "hidden";*/
           height: 30px;
           width: 30px;
           /*padding: 10px;
@@ -283,6 +291,7 @@
         }
     
         #dicePosition2 {
+          /*visibility: "hidden";*/
           height: 30px;
           width: 30px;
           /*padding: 10px;
