@@ -741,6 +741,9 @@ var communityChestArray = [
 ];
 
 function shuffles(array){
+    /*
+    * Shuffles either the chance deck or the community chance deck (whichever it is passed)
+    */
     var i =0;
     var j = 0;
     var temp = null;
@@ -754,12 +757,20 @@ function shuffles(array){
 }
 
 function getChanceCard() {
+    /*
+    * Takes the chance card at the top of the deck and passes it to the chance animation function
+    * (fadeCardOut)
+    */
     var card = chanceArray.shift();
     chanceArray.push(card);
     fadeCardOut(card, "chanceCard");
 }
 
 function chance(playerPos, player, card){
+    /*
+    * This holds all the possible things that can be done via a chance card. 
+    */
+
     if (card.Id == 6 ){
         setJailCard();
         decideOnNextPlayer();
@@ -805,11 +816,17 @@ function chance(playerPos, player, card){
 }    
 
 function setJailCard(){
+    /*
+    * Gives the player a Get Out Of Jail Card
+    */
     players[turn].jailCard = true;
-    //alert("Player received Get out of Jail Free Card");
 }
 
 function calcHouseHotels(housePrice, hotelPrice) {
+    /*
+    * This is for the chance card that makes you pay for repairs. It checks how many houses and 
+    * hotels you have and then creates a cost from this.
+    */
     var houses = 0;
     var hotels = 0;
     var houseP = 0;
@@ -832,23 +849,30 @@ function calcHouseHotels(housePrice, hotelPrice) {
 }
 
 function advance(tile, playerObj){
+    /*
+    * This works with the chance cards that move the player forward. Must first calculate how
+    * far the player has to travel
+    */
     var spaces = distanceCalculator(tile, playerObj.position);
     movePlayer(playerObj, spaces);
     //document.getElementById(tile).appendChild(players[turn].id);
 }
 
 function getCommChestCard() {
+    /*
+    * Takes the community chest card at the top of the deck and passes it to the chance animation 
+    * function (fadeCardOut)
+    */
     var card = communityChestArray.shift(); // takes top card from array
     //var card = communityChestArray[12];
     communityChestArray.push(card);
     fadeCardOut(card, "commChestCard");
 }
 
-async function communityChest(playerPos, player, card){
-    /*await sleep(500);
-    var card = communityChestArray.shift(); // takes top card from array
-    //var card = communityChestArray[4];
-    communityChestArray.push(card);  // adds card to end of array*/
+function communityChest(playerPos, player, card){
+    /*
+    * This holds all the possible things that can be done via a community chest card. 
+    */
   
     if (card.Id == 6){
         setJailCard(); // player receives get out of jail free card
@@ -881,22 +905,38 @@ async function communityChest(playerPos, player, card){
 }
 
 function comChestCollect(amount){
+    /*
+    * Used with the community chest cards that give the player money
+    */
     players[turn].money += amount;
 }
 
 function comChestFine(amount){
+    /*
+    * Used with the community chest cards that take away from the player's money
+    */
     players[turn].money -= amount;
     kitty += amount;
+    //Checking if this has bankrupt them
+    if(players[turn].money <= 0) {
+        bankrupt(players[turn]);
+    }
     document.getElementById("kitty").innerHTML = kitty;
 }
 
 function playerCollect(amount){
-    // collects amount from each player and adds to current player.
+    /*
+    * Collects amount from each player and adds to current player.
+    */
     var collection = 0;
     for(var i = 0; i < players.length; i++){
         if(players[i] != players[turn]){
-            players[i].money -=amount;
+            players[i].money -= amount;
             collection += amount;
+            //Checking if the player is bankrupt
+            if(players[i].money <= 0) {
+                bankrupt(players[i]);
+            }
         }
     }
     players[turn].money += collection;
@@ -931,7 +971,6 @@ function playerCollect(amount){
 
     document.addEventListener("DOMContentLoaded", init, false);
 
-    //var rollButton;
     var endTurnButton;
     var endTurnAllowed = true;
     
@@ -946,14 +985,6 @@ function playerCollect(amount){
     var bid100Button;
     var withdrawButton;
 
-    /*
-    var bootButton;
-    var carButton;
-    var hatButton;
-    var shipButton;
-    var barrButton;
-    var coneButton;
-    */
     var canButton;
     var burrButton;
     var pastaButton;
@@ -968,7 +999,7 @@ function playerCollect(amount){
     var straightFadeOut;
 
     //House variables
-    var qualifiedTiles = [];
+    var qualifiedTiles = []; //Used for deciding which properties can be built on
 
     //For tax
     var kitty = 0;
@@ -976,8 +1007,7 @@ function playerCollect(amount){
     //For bankruptcy
     var numberOfAuctions;
     var currentlyBankrupting = false;
-    var bankruptingPlayer;
-    var deficitAmount = 0;
+    var bankruptingPlayer; //For deciding whether their are more properties to auction off during a bankruptcy
 
     function init () {
         //Creating the main buttons button
@@ -1095,6 +1125,24 @@ function playerCollect(amount){
         document.getElementById("buttonHolder").appendChild(showMortgageButton);
         showMortgageButton.addEventListener("click", showMortgageableProps, false);
 
+        var tradeButton = document.createElement("button");
+        tradeButton.id = "tradeButton";
+        tradeButton.innerHTML = "TRADE";
+        tradeButton.style.top = "390px";
+        tradeButton.style.width = "200px";
+        tradeButton.style.height = "50px";
+        tradeButton.style.position = "absolute";
+        tradeButton.style.borderRadius = "10px";
+        tradeButton.style.backgroundColor = "#c2c2a3";
+        tradeButton.style.borderColor = "black";
+        tradeButton.style.left = "10px";
+        tradeButton.setAttribute("disabled", "disabled");
+        tradeButton.style.fontSize = "20px";
+        tradeButton.style.fontFamily = "bold";
+        document.getElementById("buttonHolder").appendChild(tradeButton);
+        tradeButton.addEventListener("click", tradeClicked, false);
+        //Finished creating the main buttons
+
         //Player icon selecion
         var iconHolder = document.createElement("div");
         iconHolder.id = "iconHolder";
@@ -1211,12 +1259,13 @@ function playerCollect(amount){
         bagButton.style.borderRadius = "10px";
         document.getElementById("iconHolder").appendChild(bagButton);
         bagButton.addEventListener("click", bagPlacement, false);
-
+        //Finished icon selection
 
         //Placing the chance and community chest cards
         diagonalFadeOut = true;
         straightFadeOut = true;
 
+        //This is the orange chance card on the board
         var chanceDiv = document.createElement("div");
         chanceDiv.id = "chanceCard";
         chanceDiv.style.backgroundColor = "orange";
@@ -1230,6 +1279,7 @@ function playerCollect(amount){
         chanceDiv.style.opacity = "1.0";
         document.getElementById("body").appendChild(chanceDiv);
 
+        //This is the actual word 'chance' on the chance card
         var chanceP = document.createElement("p");
         chanceP.innerHTML = "CHANCE";
         chanceP.id = "chanceP";
@@ -1238,6 +1288,7 @@ function playerCollect(amount){
         chanceP.style.left = "25%";
         document.getElementById("chanceCard").appendChild(chanceP);
 
+        //This is the blue community chest card on the board
         var commChestDiv = document.createElement("div");
         commChestDiv.id = "commChestCard";
         commChestDiv.style.backgroundColor = "blue";
@@ -1254,6 +1305,7 @@ function playerCollect(amount){
         commChestDiv.style.opacity = "1.0";
         document.getElementById("body").appendChild(commChestDiv);
 
+        //This is the actual words 'community chest' on the card
         var commChestP = document.createElement("p");
         var commChestP2 = document.createElement("p");
         commChestP.innerHTML = "COMMUNITY";
@@ -1274,18 +1326,16 @@ function playerCollect(amount){
         players.push(createPlayer("Player 2"));
         players.push(createPlayer("Player 3"));
         players.push(createPlayer("Player 4"));
-        numPlayers = players.length;
-        //$("#player1").fadeOut();
-        //$("#player1").fadeIn();
-        //rollButton = document.getElementById("temp");
-        //endTurnButton = document.getElementById("endTurn");
+        numPlayers = 4;
 
+        //These are just sounds, you can probably ignore these
         walkSound = document.getElementById("walkSound");
         diceSound = document.getElementById("diceSound");
         jailDoorCloseSound = document.getElementById("jailClose");
         buySound = document.getElementById("chaching");
         hammerSound = document.getElementById("hammerSound");
 
+        //Shuffling the chance and community chest cards
         shuffles(chanceArray);
         shuffles(communityChestArray);
 
@@ -1306,6 +1356,8 @@ function playerCollect(amount){
         
         
         //Kitty holder (free parking)
+        //This is the little box beside Free Parking that holds all the fines that players have paid
+        //It returns to 0 when a player lands on Free Parking (the money is given to them)
         var kittyHolder = document.createElement("div");
         kittyHolder.id = "kitty";
         kittyHolder.style.height = "30px";
@@ -1324,6 +1376,7 @@ function playerCollect(amount){
 
 
         //Setting up the View Stats drop down
+        //Thing in the top right corner
         var statsDropDown = document.createElement("div");
         statsDropDown.id = "dropDown";
         statsDropDown.style.position = "absolute";
@@ -1363,11 +1416,15 @@ function playerCollect(amount){
         bbut.innerHTML = "bankrupt";
         bbut.style.position = "absolute";
         document.getElementById("body").appendChild(bbut);
-        bbut.addEventListener("click", iDeclareBankruptcy, false);
+        bbut.addEventListener("click", bankrupt.bind(null, players[0]), false);
     }
 
     $(document).ready(function() {
         $(".ver").mouseover(function() {
+            /*
+            * This is used for checking who owns a property. If the player hovers over a property
+            * that is owned, a little graphic in the bottom right will pop up saying who owns it
+            */
             if(this.id != "1008" && this.id != "1008a" && this.id != "0007" && this.id != "0007a" && this.id != "0002" && this.id != "0002a" && this.id != "0004" && this.id != "0004a") {
                 if(properties[this.id].owner && !document.getElementById("owner")) {
                     
@@ -1416,195 +1473,1428 @@ function playerCollect(amount){
         });
     });
 
-    function iDeclareBankruptcy() {
-        currentlyBankrupting = true;
-        //players[turn].money = 0;
-        disableButton("endTurn");
-        disableButton("rollDice");
-        disableButton("showMortgageButton");
-        disableButton("buy");
-        disableButton("auction");
-        disableButton("buildHouse");
-        
-        qualifiedTiles = [];
-        var mortgageableProperty = false;
+    function tradeClicked() {
+        /*
+        * This sets up the GUI for trade. A player can trade even if they have no properties or 
+        * jail card. They can still trade with their money. The idea behind trade is that both
+        * players in the trade will have the same type of GUI, where they can freely offer their
+        * own stuff, but theyhave to request the other person's stuff
+        */
 
-        for(var i = 0; i < players[turn].assets.length; i++) {
-            if(!properties[players[turn].assets[i]].mortgaged) {
-                mortgageableProperty = true;
-                break;
-            }
+        //Deciding which button is the active one
+        var enabledButton;
+        if(!document.getElementById("rollDice").hasAttribute("disabled")) {
+            enabledButton = "rollDice";
+            document.getElementById("rollDice").setAttribute("disabled", "disabled");
+        } else if(!document.getElementById("endTurn").hasAttribute("disabled")) {
+            enabledButton = "endTurn";
+            document.getElementById("endTurn").setAttribute("disabled", "disabled");
         }
 
-        var bankruptHolder = document.createElement("div");
-        bankruptHolder.id = "bankruptHolder";
-        bankruptHolder.style.position = "absolute";
-        bankruptHolder.style.height = "130px";
-        bankruptHolder.style.width = "260px";
-        bankruptHolder.style.top = "35%";
-        bankruptHolder.style.left = "3%";
-        bankruptHolder.style.border = "5px solid black";
-        bankruptHolder.style.borderRadius = "10px";
-        bankruptHolder.style.backgroundColor = "#00001a";
-        document.getElementById("body").appendChild(bankruptHolder);
+        //Setting up the trade GUI
+        var tradersAvailable = availableTraders();
+        var tradersHolder = document.createElement("div");
+        tradersHolder.id = "tradersHolder";
+        tradersHolder.style.position = "absolute";
+        tradersHolder.style.width = "220px";
+        tradersHolder.style.height = "70px";
+        tradersHolder.style.top = "25%";
+        tradersHolder.style.left = "5%";
+        tradersHolder.style.border = "5px solid black";
+        tradersHolder.style.borderRadius = "10px";
+        tradersHolder.style.backgroundColor = "#00001a";
+        document.getElementById("body").appendChild(tradersHolder);
 
-        var mortgageButton = document.createElement("button");
-        mortgageButton.id = "mortgageButton";
-        mortgageButton.style.position = "absolute";
-        mortgageButton.style.height = "50px";
-        mortgageButton.style.width = "240px";
-        mortgageButton.style.top = "10px";
-        mortgageButton.style.left = "10px";
-        mortgageButton.style.borderRadius = "10px";
-        mortgageButton.style.backgroundColor = "#0099ff";
-        if(!mortgageableProperty) {
-            mortgageButton.style.backgroundColor = "#c2c2a3";
-            mortgageButton.setAttribute("disabled", "disabled");
-        }
-        mortgageButton.style.borderColor = "black";
-        mortgageButton.innerHTML = "MORTGAGE PROPERTY";
-        mortgageButton.style.fontSize = "20px";
-        mortgageButton.style.fontFamily = "bold";
-        document.getElementById("bankruptHolder").appendChild(mortgageButton);
-        mortgageButton.addEventListener("click", bankruptMortgaging.bind(null, players[turn]), false);
-
-        var sellJailCard = document.createElement("button");
-        sellJailCard.id = "sellJailCard";
-        sellJailCard.style.position = "absolute";
-        sellJailCard.style.height = "50px";
-        sellJailCard.style.width = "240px";
-        sellJailCard.style.top = "70px";
-        sellJailCard.style.left = "10px";
-        sellJailCard.style.borderRadius = "10px";
-        sellJailCard.style.backgroundColor = "#0099ff";
-        if(players[turn].getOutOfJail == 0) {
-            sellJailCard.style.backgroundColor = "#c2c2a3";
-            sellJailCard.setAttribute("disabled", "disabled");
-        }
-        sellJailCard.style.borderColor = "black";
-        sellJailCard.innerHTML = "TRADE JAIL CARD";
-        sellJailCard.style.fontSize = "20px";
-        sellJailCard.style.fontFamily = "bold";
-        document.getElementById("bankruptHolder").appendChild(sellJailCard);
-
-        if(!mortgageableProperty && players[turn].getOutOfJail == 0) {
-            var bankruptHolder = document.getElementById("bankruptHolder");     
-            bankruptHolder.parentNode.removeChild(bankruptHolder);       
-            bankrupt(players[turn]);
-        }
-    }
-
-    function bankruptMortgaging(playerObj) {
-        var bankruptHolder = document.getElementById("bankruptHolder");
-        bankruptHolder.parentNode.removeChild(bankruptHolder);
-
-        for(var i = 0; i < players[turn].assets.length; i++) {
-            if(!properties[players[turn].assets[i]].mortgaged) {
-                qualifiedTiles.push(players[turn].assets[i]);
-            }
-        }
-
-        var mortgageHolder = document.createElement("div");
-        mortgageHolder.id = "mortgageHolderB";
-        mortgageHolder.style.position = "absolute";
-        mortgageHolder.style.height = "95px";
-        if(qualifiedTiles.length > 2) {
-            mortgageHolder.style.width = "250px";
-            mortgageHolder.style.overflowY = "scroll";
+        if(tradersAvailable.length == 0) {
+            //If in here, the trader has no properties to trade
+            var tradersLabel = document.createElement("label");
+            tradersLabel.id = "tLabel";
+            tradersLabel.style.height = "50px";
+            tradersLabel.style.width = "200px";
+            tradersLabel.style.position = "absolute";
+            tradersLabel.style.top = "10px";
+            tradersLabel.style.left = "10px";
+            tradersLabel.innerHTML = "NO TRADERS AVAILABLE";
+            tradersLabel.style.textAlign = "center";
+            tradersLabel.style.verticalAlign = "middle";
+            tradersLabel.style.lineHeight = "50px";
+            tradersLabel.style.borderRadius = "10px";
+            tradersLabel.style.backgroundColor = "#c2c2a3";
+            document.getElementById("tradersHolder").appendChild(tradersLabel);
         } else {
-            mortgageHolder.style.width = "240px";
-            if(qualifiedTiles.length == 1) {
-                mortgageHolder.style.height = "50px";
+            //This means they do have properties, so we have to place them
+            tradersHolder.style.height = (10 + (60 * tradersAvailable.length)).toString().concat("px");
+            for(var i = 0; i < tradersAvailable.length; i++) {
+                var traderButton = document.createElement("button");
+                traderButton.id = "traderButton".concat(i.toString());
+                traderButton.style.height = "50px";
+                traderButton.style.width = "200px";
+                traderButton.style.position = "absolute";
+                traderButton.style.top = ((10 * (i+1)) + (50 * i)).toString().concat("px");
+                traderButton.style.left = "10px";
+                traderButton.innerHTML = tradersAvailable[i].name;
+                traderButton.style.textAlign = "center";
+                traderButton.style.verticalAlign = "middle";
+                traderButton.style.lineHeight = "50px";
+                traderButton.style.borderRadius = "10px";
+                traderButton.style.backgroundColor = "#0099ff";
+                traderButton.style.borderColor = "black";     
+                traderButton.style.fontSize = "20px";
+                traderButton.style.fontFamily = "bold";
+                document.getElementById("tradersHolder").appendChild(traderButton);
+                traderButton.addEventListener("click", reqTrade.bind(null, tradersAvailable[i], enabledButton), false);
             }
-        }
-        mortgageHolder.style.top = "35%";
-        mortgageHolder.style.left = "5%";
-        mortgageHolder.style.border = "5px solid black";
-        mortgageHolder.style.borderRadius = "10px";
-        mortgageHolder.style.backgroundColor = "#00001a";
-        document.getElementById("body").appendChild(mortgageHolder);
-
-        var cancelBuildButton = document.createElement("button");
-        cancelBuildButton.id = "cancelMortgage";
-        cancelBuildButton.style.width = "15px";
-        cancelBuildButton.style.height = "15px";
-        cancelBuildButton.style.backgroundImage = "url('images/cancel.png')";
-        cancelBuildButton.style.backgroundSize = "11px 11px";
-        cancelBuildButton.style.borderRadius = "5px";
-        cancelBuildButton.style.position = "absolute";
-        cancelBuildButton.style.left = "5%";
-        cancelBuildButton.style.top = "35%";
-        document.getElementById("body").appendChild(cancelBuildButton);
-        cancelBuildButton.addEventListener("click", removeBankruptMortgageGUI, false);
-
-        for(var i = 0; i < qualifiedTiles.length; i++) {
-            var propertyButton = document.createElement("button");
-            propertyButton.id = qualifiedTiles[i];
-            propertyButton.innerHTML = properties[qualifiedTiles[i]].name.toUpperCase();
-            propertyButton.style.top = (5 + ((40 * i) + (5 * i))).toString().concat("px");;
-            propertyButton.style.left = "10px";
-            propertyButton.style.width = "220px";
-            propertyButton.style.height = "40px";
-            propertyButton.style.position = "absolute";
-            propertyButton.style.borderRadius = "10px";
-            propertyButton.style.backgroundColor = "#0099ff";
-            propertyButton.style.borderColor = "black";
-            propertyButton.style.fontSize = "20px";
-            propertyButton.style.fontFamily = "bold";
-            document.getElementById("mortgageHolderB").appendChild(propertyButton);
-            propertyButton.addEventListener("click", mortgage.bind(null, players[turn], propertyButton.id), false);
         }
     }
 
-    function removeBankruptMortgageGUI() {
-        var holder = document.getElementById("mortgageHolderB");
-        holder.parentNode.removeChild(holder);
-        var cancel = document.getElementById("cancelMortgage");
-        cancel.parentNode.removeChild(cancel);
-        qualifiedTiles = [];
-        checkIfStillBankrupt(players[turn]);
+    function availableTraders() {
+        /*
+        * This runs through the list of players and returns all players who can trade (if they have
+        * any money at all). The player then chooses who they want to trade with using the buttons
+        */
+        var traders = [];
+        for(var i = 0; i < numPlayers; i++) {
+            if(players[i] == players[turn]) {
+                //If players[i] is the person requesting a trade, don't add them
+                continue;
+            } else {
+                if(players[i].money > 0) {
+                    traders.push(players[i]);
+                }
+            }
+        }
+        return traders;
+    }
+
+    function reqTrade(playerClicked, enabledButton) {
+        //This tells the trade GUI set up function which player they want to trade with
+        var tradersHolder = document.getElementById("tradersHolder");
+        tradersHolder.parentNode.removeChild(tradersHolder);
+
+        showAssets(players[turn], playerClicked, enabledButton);
+    }
+
+    function showAssets(traderAssets, tradeeAssets, enabledButton){
+        /*
+        * Sets up the information for the GUI, getting all the trader's assets and all the tradee's assets
+        */
+        var traderPropsAvailableTrade = [];
+        var tradeePropsAvailableTrade = [];
+
+         for(var i = 0; i < traderAssets.assets.length; i++){
+             //This is where we get the trader's assets
+            traderPropsAvailableTrade.push(traderAssets.assets[i]);
+        }
+        for(var i = 0; i < tradeeAssets.assets.length; i++){
+            //This is where we get the tradee's assets
+            tradeePropsAvailableTrade.push(tradeeAssets.assets[i]);
+        }
+
+        setUpTradeGUI(traderPropsAvailableTrade, tradeePropsAvailableTrade, traderAssets, tradeeAssets, enabledButton);
+    }
+
+    function setUpTradeGUI(traderPropsAvailableTrade, tradeePropsAvailableTrade, traderAssets, tradeeAssets, enabledButton) {
+        /*
+        * Sets up the actual GUI, using the assets information from the previous function
+        */
+
+        //This is used to make a link between the buttons in the trade and what the actual property
+        //the button is representing. The key/value pair is 'buttonID'/'tileID'
+        var propertiesHolder = {};
+
+        //This is just setting up the GUI
+        var tradeOuter = document.createElement("div");
+        tradeOuter.id = "tradeOuter";
+        tradeOuter.style.position = "absolute";
+        tradeOuter.style.width = "270px";
+        tradeOuter.style.height = "624px";
+        tradeOuter.style.top = "50px";
+        tradeOuter.style.left = "50px";
+        tradeOuter.style.border = "5px solid black";
+        tradeOuter.style.borderRadius = "10px";
+        tradeOuter.style.backgroundColor = "#ffcc66";
+        document.getElementById("body").appendChild(tradeOuter);
+
+        var cancelTrade = document.createElement("button");
+        cancelTrade.style.height = "15px";
+        cancelTrade.style.width = "15px";
+        cancelTrade.style.position = "absolute";
+        cancelTrade.style.right = "0px";
+        cancelTrade.style.top = "0px";
+        cancelTrade.style.borderRadius = "2px";
+        cancelTrade.style.backgroundImage = "url('images/cancel.png')";
+        cancelTrade.style.backgroundSize = "12px 12px";
+        document.getElementById("tradeOuter").appendChild(cancelTrade);
+        cancelTrade.addEventListener("click", removeTradeGUI.bind(null, enabledButton), false);
+        
+        var traderAssetsHolder = document.createElement("div");
+        traderAssetsHolder.id = "traderAssetsHolder";
+        traderAssetsHolder.style.position = "absolute";
+        traderAssetsHolder.style.width = "230px";
+        traderAssetsHolder.style.height = "100px";
+        traderAssetsHolder.style.top = "20px";
+        traderAssetsHolder.style.left = "20px";
+        traderAssetsHolder.style.border = "5px solid black";
+        traderAssetsHolder.style.borderRadius = "10px";
+        traderAssetsHolder.style.backgroundColor = "#00001a";
+        traderAssetsHolder.style.overflowY = "scroll";
+        document.getElementById("tradeOuter").appendChild(traderAssetsHolder);
+
+        var traderCapitalButton = document.createElement("button");
+        traderCapitalButton.id = "traderCapitalButton";
+        traderCapitalButton.style.height = "50px";
+        traderCapitalButton.style.width = "200px";
+        traderCapitalButton.style.position = "absolute";
+        traderCapitalButton.style.top = "10px";
+        traderCapitalButton.style.left = "10px";
+        traderCapitalButton.innerHTML = "Trade Capital<br>Captial Available: " + traderAssets.money;
+        traderCapitalButton.style.textAlign = "center";
+        traderCapitalButton.style.borderRadius = "10px";
+        traderCapitalButton.style.backgroundColor = "#0099ff";
+        traderCapitalButton.style.borderColor = "black";
+        traderCapitalButton.style.fontSize = "18px";
+        traderCapitalButton.style.fontFamily = "bold";
+        document.getElementById("traderAssetsHolder").appendChild(traderCapitalButton);
+        traderCapitalButton.addEventListener("click", offerCapitalClicked.bind(null, "trader", propertiesHolder, traderAssets), false);
+
+        if(traderPropsAvailableTrade == 0) {
+            //Here if the trader has no properties to trade
+            var tradersPropsLabel = document.createElement("label");
+            tradersPropsLabel.id = "tradersPropsLabel";
+            tradersPropsLabel.style.height = "50px";
+            tradersPropsLabel.style.width = "200px";
+            tradersPropsLabel.style.position = "absolute";
+            tradersPropsLabel.style.top = "70px";
+            tradersPropsLabel.style.left = "10px";
+            tradersPropsLabel.innerHTML = "NO PROPERTIES TO SHOW";
+            tradersPropsLabel.style.textAlign = "center";
+            tradersPropsLabel.style.verticalAlign = "middle";
+            tradersPropsLabel.style.lineHeight = "50px";
+            tradersPropsLabel.style.borderRadius = "10px";
+            tradersPropsLabel.style.backgroundColor = "#c2c2a3";
+            document.getElementById("traderAssetsHolder").appendChild(tradersPropsLabel);
+        } else {
+            //This runs throught the assets if they do ahve any
+            for(var i = 0; i < traderPropsAvailableTrade.length; i++) {
+                var traderAssetButton = document.createElement("button");
+                traderAssetButton.id = ("traderAssetButton").concat(i.toString());
+                traderAssetButton.style.height = "50px";
+                traderAssetButton.style.width = "200px";
+                traderAssetButton.style.position = "absolute";
+                traderAssetButton.style.top = (10 + (10 * (i+1)) + (50 * (i+1))).toString().concat("px");
+                traderAssetButton.style.left = "10px";
+                traderAssetButton.innerHTML = properties[traderPropsAvailableTrade[i]].name;
+                traderAssetButton.style.textAlign = "center";
+                traderAssetButton.style.verticalAlign = "middle";
+                traderAssetButton.style.lineHeight = "50px";
+                traderAssetButton.style.borderRadius = "10px";
+                traderAssetButton.style.backgroundColor = "#0099ff";
+                traderAssetButton.style.borderColor = "black";     
+                traderAssetButton.style.fontSize = "20px";
+                traderAssetButton.style.fontFamily = "bold";
+                document.getElementById("traderAssetsHolder").appendChild(traderAssetButton);
+                propertiesHolder[traderAssetButton.id] = traderPropsAvailableTrade[i]
+                traderAssetButton.addEventListener("click", addPropDecider.bind(null, traderPropsAvailableTrade[i], traderAssetButton.id, propertiesHolder), false);
+            }
+        }
+
+        //This runs through any Get Out Of Jail Free cards the trader has
+        for(var i = 0; i < traderAssets.getOutOfJail; i++) {
+            var traderJailCardButton = document.createElement("button");
+            traderJailCardButton.id = "traderJailCardButton".concat(i.toString());
+            traderJailCardButton.style.height = "50px";
+            traderJailCardButton.style.width = "200px";
+            traderJailCardButton.style.position = "absolute";
+            traderJailCardButton.style.top = (130 + (60 * (i)) + (60 * (traderPropsAvailableTrade.length-1))).toString().concat("px");
+            traderJailCardButton.style.left = "10px";
+            traderJailCardButton.innerHTML = "JAIL CARD";
+            traderJailCardButton.style.textAlign = "center";
+            traderJailCardButton.style.verticalAlign = "middle";
+            traderJailCardButton.style.lineHeight = "50px";
+            traderJailCardButton.style.borderRadius = "10px";
+            traderJailCardButton.style.backgroundColor = "#0099ff";
+            traderJailCardButton.style.borderColor = "black";     
+            traderJailCardButton.style.fontSize = "20px";
+            traderJailCardButton.style.fontFamily = "bold";
+            document.getElementById("traderAssetsHolder").appendChild(traderJailCardButton);
+            traderJailCardButton.addEventListener("click", addJailCardDecider.bind(null, traderJailCardButton.id), false);
+        }
+
+        //This is where the assets are actually held
+        var tradeeAssetsHolder = document.createElement("div");
+        tradeeAssetsHolder.id = "tradeeAssetsHolder";
+        tradeeAssetsHolder.style.position = "absolute";
+        tradeeAssetsHolder.style.width = "230px";
+        tradeeAssetsHolder.style.height = "100px";
+        tradeeAssetsHolder.style.bottom = "20px";
+        tradeeAssetsHolder.style.left = "20px";
+        tradeeAssetsHolder.style.border = "5px solid black";
+        tradeeAssetsHolder.style.borderRadius = "10px";
+        tradeeAssetsHolder.style.backgroundColor = "#00001a";
+        tradeeAssetsHolder.style.overflowY = "scroll";
+        document.getElementById("tradeOuter").appendChild(tradeeAssetsHolder);
+
+        var tradeeCapitalButton = document.createElement("button");
+        tradeeCapitalButton.id = "tradeeCapitalButton";
+        tradeeCapitalButton.style.height = "50px";
+        tradeeCapitalButton.style.width = "200px";
+        tradeeCapitalButton.style.position = "absolute";
+        tradeeCapitalButton.style.top = "10px";
+        tradeeCapitalButton.style.left = "10px";
+        tradeeCapitalButton.innerHTML = "Trade Capital<br>Capital Available: " + tradeeAssets.money;
+        tradeeCapitalButton.style.textAlign = "center";
+        tradeeCapitalButton.style.borderRadius = "10px";
+        tradeeCapitalButton.style.backgroundColor = "#0099ff";
+        tradeeCapitalButton.style.borderColor = "black";
+        tradeeCapitalButton.style.fontSize = "18px";
+        tradeeCapitalButton.style.fontFamily = "bold";
+        document.getElementById("tradeeAssetsHolder").appendChild(tradeeCapitalButton);
+        tradeeCapitalButton.addEventListener("click", offerCapitalClicked.bind(null, "tradee", propertiesHolder, tradeeAssets), false);
+
+        //Just doing the same thing for the tradee
+        if(tradeePropsAvailableTrade == 0) {
+            var tradeesPropsLabel = document.createElement("label");
+            tradeesPropsLabel.id = "tradeesPropsLabel";
+            tradeesPropsLabel.style.height = "50px";
+            tradeesPropsLabel.style.width = "200px";
+            tradeesPropsLabel.style.position = "absolute";
+            tradeesPropsLabel.style.top = "70px";
+            tradeesPropsLabel.style.left = "10px";
+            tradeesPropsLabel.innerHTML = "NO PROPERTIES TO SHOW";
+            tradeesPropsLabel.style.textAlign = "center";
+            tradeesPropsLabel.style.verticalAlign = "middle";
+            tradeesPropsLabel.style.lineHeight = "50px";
+            tradeesPropsLabel.style.borderRadius = "10px";
+            tradeesPropsLabel.style.backgroundColor = "#c2c2a3";
+            document.getElementById("tradeeAssetsHolder").appendChild(tradeesPropsLabel);
+        } else {
+            for(var i = 0; i < tradeePropsAvailableTrade.length; i++) {
+                var tradeeAssetButton = document.createElement("button");
+                tradeeAssetButton.id = "tradeeAssetButton".concat(i.toString());
+                tradeeAssetButton.style.height = "50px";
+                tradeeAssetButton.style.width = "200px";
+                tradeeAssetButton.style.position = "absolute";
+                tradeeAssetButton.style.top = (10 + (10 * (i+1)) + (50 * (i+1))).toString().concat("px");
+                tradeeAssetButton.style.left = "10px";
+                tradeeAssetButton.innerHTML = properties[tradeePropsAvailableTrade[i]].name;
+                tradeeAssetButton.style.textAlign = "center";
+                tradeeAssetButton.style.verticalAlign = "middle";
+                tradeeAssetButton.style.lineHeight = "50px";
+                tradeeAssetButton.style.borderRadius = "10px";
+                tradeeAssetButton.style.backgroundColor = "#0099ff";
+                tradeeAssetButton.style.borderColor = "black";     
+                tradeeAssetButton.style.fontSize = "20px";
+                tradeeAssetButton.style.fontFamily = "bold";
+                document.getElementById("tradeeAssetsHolder").appendChild(tradeeAssetButton);
+                propertiesHolder[tradeeAssetButton.id] = tradeePropsAvailableTrade[i];
+                tradeeAssetButton.addEventListener("click", addPropDecider.bind(null, tradeePropsAvailableTrade[i], tradeeAssetButton.id, propertiesHolder), false);
+            }
+        }
+
+        for(var i = 0; i < tradeeAssets.getOutOfJail; i++) {
+            var tradeeJailCardButton = document.createElement("button");
+            tradeeJailCardButton.id = "tradeeJailCardButton".concat(i.toString());
+            tradeeJailCardButton.style.height = "50px";
+            tradeeJailCardButton.style.width = "200px";
+            tradeeJailCardButton.style.position = "absolute";
+            tradeeJailCardButton.style.top = (130 + (60 * (i)) + (60 * (tradeePropsAvailableTrade.length-1))).toString().concat("px");
+            tradeeJailCardButton.style.left = "10px";
+            tradeeJailCardButton.innerHTML = "JAIL CARD";
+            tradeeJailCardButton.style.textAlign = "center";
+            tradeeJailCardButton.style.verticalAlign = "middle";
+            tradeeJailCardButton.style.lineHeight = "50px";
+            tradeeJailCardButton.style.borderRadius = "10px";
+            tradeeJailCardButton.style.backgroundColor = "#0099ff";
+            tradeeJailCardButton.style.borderColor = "black";     
+            tradeeJailCardButton.style.fontSize = "20px";
+            tradeeJailCardButton.style.fontFamily = "bold";
+            document.getElementById("tradeeAssetsHolder").appendChild(tradeeJailCardButton);
+            tradeeJailCardButton.addEventListener("click", addJailCardDecider.bind(null, tradeeJailCardButton.id), false);
+        }
+
+        //This is the offer part of the GUI, where all the properties that are currently being
+        //offered are put
+        var offerHolder = document.createElement("div");
+        offerHolder.id = "offerHolder";
+        offerHolder.style.position = "absolute";
+        offerHolder.style.width = "230px";
+        offerHolder.style.height = "260px";
+        offerHolder.style.top = "182px";
+        offerHolder.style.left = "20px";
+        document.getElementById("tradeOuter").appendChild(offerHolder);
+
+        var traderOfferHolder = document.createElement("div");
+        traderOfferHolder.id = "traderOfferHolder";
+        traderOfferHolder.style.position = "absolute";
+        traderOfferHolder.style.width = "230px";
+        traderOfferHolder.style.height = "100px";
+        traderOfferHolder.style.top = "0px";
+        traderOfferHolder.style.left = "0px";
+        traderOfferHolder.style.border = "5px solid black";
+        traderOfferHolder.style.borderRadius = "10px";
+        traderOfferHolder.style.backgroundColor = "#00001a";
+        traderOfferHolder.style.overflowY = "scroll";
+        document.getElementById("offerHolder").appendChild(traderOfferHolder);
+
+        var tradeeOfferHolder = document.createElement("div");
+        tradeeOfferHolder.id = "tradeeOfferHolder";
+        tradeeOfferHolder.style.position = "absolute";
+        tradeeOfferHolder.style.width = "230px";
+        tradeeOfferHolder.style.height = "100px";
+        tradeeOfferHolder.style.bottom = "0px";
+        tradeeOfferHolder.style.left = "0px";
+        tradeeOfferHolder.style.border = "5px solid black";
+        tradeeOfferHolder.style.borderRadius = "10px";
+        tradeeOfferHolder.style.backgroundColor = "#00001a";
+        tradeeOfferHolder.style.overflowY = "scroll";
+        document.getElementById("offerHolder").appendChild(tradeeOfferHolder);
+
+        //This button finishes the trade (if accepted)
+        var finishOfferButton = document.createElement("button");
+        finishOfferButton.id = "finishOfferButton";
+        finishOfferButton.style.height = "40px";
+        finishOfferButton.style.width = "240px";
+        finishOfferButton.style.position = "absolute";
+        finishOfferButton.style.top = "110px";
+        finishOfferButton.style.left = "0px";
+        finishOfferButton.innerHTML = "PROPOSE TRADE";
+        finishOfferButton.style.textAlign = "center";
+        finishOfferButton.style.verticalAlign = "middle";
+        finishOfferButton.style.lineHeight = "40px";
+        finishOfferButton.style.borderRadius = "10px";
+        finishOfferButton.style.backgroundColor = "#c2c2a3";
+        finishOfferButton.style.borderColor = "black";
+        finishOfferButton.setAttribute("disabled", "disabled");
+        document.getElementById("offerHolder").appendChild(finishOfferButton);
+        finishOfferButton.addEventListener("click", proposeTrade.bind(null, "trader", traderAssets, tradeeAssets, propertiesHolder, enabledButton), false);
+    }
+
+    function offerCapitalClicked(traderOrTradee, propertiesHolder, traderOrTradeeObject) {
+        /*
+        * This is for deciding who offered money. traderOrTradee determines if the money is supposed
+        * to be coming from the trader or the tradee
+        */
+
+        //This is the id of the holder div for either the trader or the tradee, depending on where
+        //the money is coming from
+        var tradexButtonsID;
+        if(traderOrTradee == "trader") {
+            tradexButtonsID = "traderAssetsHolder";
+            tradex = "traderCapitalButton";
+        } else if(traderOrTradee == "tradee") {
+            tradexButtonsID = "tradeeAssetsHolder";
+            tradex = "tradeeCapitalButton";
+        }
+
+        for(var i = 0; i < document.getElementById(tradexButtonsID).childNodes.length; i++) {
+            //This disables all the buttons in the corresponding holder div so they can't be pressed
+            //while deciding how much money
+            document.getElementById(tradexButtonsID).childNodes[i].setAttribute("disabled", "disabled");
+            document.getElementById(tradexButtonsID).childNodes[i].style.backgroundColor = "#c2c2a3";
+        }
+
+        //This is just theh GUI for offering. It's an input field above two buttons, offer and cancel
+        var offerOuter = document.createElement("div");
+        offerOuter.id = "offerOuter".concat(tradex);
+        offerOuter.style.position = "absolute";
+        offerOuter.style.width = "128px";
+        offerOuter.style.height = "41px";
+        offerOuter.style.top = "2.5px";
+        offerOuter.style.left = "36px";
+        document.getElementById(tradex).appendChild(offerOuter);
+
+        var offerInput = document.createElement("input");
+        offerInput.id = "offerInput".concat(tradex);
+        offerInput.style.height = "15px";
+        offerInput.style.width = "128px";
+        offerInput.style.position = "absolute";
+        offerInput.style.left = "0px";
+        offerInput.style.top = "0px"
+        offerInput.placeholder = "Offer Money";
+        document.getElementById("offerOuter".concat(tradex)).appendChild(offerInput);
+
+        var offerButton = document.createElement("button");
+        offerButton.id = "offerButton".concat(tradex);
+        offerButton.style.height = "21px";
+        offerButton.style.width = "66px";
+        offerButton.style.position = "absolute";
+        offerButton.style.left = "0px";
+        offerButton.style.bottom = "0px";
+        offerButton.innerHTML = "OFFER";
+        document.getElementById("offerOuter".concat(tradex)).appendChild(offerButton);
+        offerButton.addEventListener("click", offerCapitalAmount.bind(null, tradex, tradexButtonsID, propertiesHolder, traderOrTradeeObject), false);
+
+        var cancelButton = document.createElement("button");
+        cancelButton.id = "cancelOfferButton".concat(tradex);
+        cancelButton.style.height = "21px";
+        cancelButton.style.width = "66px";
+        cancelButton.style.position = "absolute";
+        cancelButton.style.left = "66px";
+        cancelButton.style.bottom = "0px";
+        cancelButton.innerHTML = "CANCEL";
+        document.getElementById("offerOuter".concat(tradex)).appendChild(cancelButton);
+        cancelButton.addEventListener("click", removeCapitalOfferGUI.bind(null, tradex, tradexButtonsID), false);
+    }
+
+    function removeCapitalOfferGUI(tradex, tradexButtonsID) {
+        //This removes the GUI for offering up money.
+        var offerOuter = document.getElementById("offerOuter".concat(tradex));
+        offerOuter.parentNode.removeChild(offerOuter);
+
+        var traderOrTradee = tradexButtonsID.substring(0, 6).concat("OfferHolder");
+        
+        setTimeout(function() {
+            //Have to delay slightly so clicking the cancel button doesn't also click the button
+            //to activate the capital offer again
+            for(var i = 0; i < document.getElementById(tradexButtonsID).childNodes.length; i++) {
+                //This reactivates all buttons in the corresponding holder div (all the properties)
+                if(document.getElementById(tradexButtonsID).childNodes[i].id.substring(7, 12) == "Props") {
+                    //Do nothing, the label should never change colour
+                } else {
+                    document.getElementById(tradexButtonsID).childNodes[i].removeAttribute("disabled");
+                    document.getElementById(tradexButtonsID).childNodes[i].style.backgroundColor = "#0099ff";
+                }
+            }
+
+            for(var i = 0; i < document.getElementById(traderOrTradee).childNodes.length; i++) {
+                //This re-deactivates the properties that are currently being offered so you cannot
+                //press them again
+                if(document.getElementById(traderOrTradee).childNodes[i].id.substring(0, 7) == "capital") {
+                    //do nothing
+                } else {
+                    var originalID = document.getElementById(traderOrTradee).childNodes[i].id.substring(0, document.getElementById(traderOrTradee).childNodes[i].id.length-5);
+                    document.getElementById(originalID).setAttribute("disabled", "disabled");
+                    document.getElementById(originalID).style.backgroundColor = "#c2c2a3";
+                }
+            }
+        }, 50);
+    }
+
+    function offerCapitalAmount(tradex, tradexButtonsID, propertiesHolder, traderOrTradeeObject) {
+        //This places the offered amount into the offers div in the center
+        //tradex is either trader or tradee
+        var traderOrTradee = tradexButtonsID.substring(0, 6).concat("OfferHolder");
+        var amount = parseInt(document.getElementById("offerInput".concat(tradex)).value);
+        var oldAmount = 0;
+        //If some money has already been offered, we want to just add the new amount to it
+        if(document.getElementById("capital".concat(traderOrTradee))) {
+            oldAmount = parseInt(document.getElementById("capital".concat(traderOrTradee)).innerHTML);
+        }
+
+        //Just some error checking so they can only input a number
+        if(amount == "" || isNaN(amount)) {
+            alert("Please enter a valid amount to offer");
+            document.getElementById("offerInput".concat(tradex)).value = "";
+        } else {
+            if((amount + oldAmount) > traderOrTradeeObject.money) {
+                alert("Please enter an amount the player can afford");
+                document.getElementById("offerInput".concat(tradex)).value = "";
+            } else {
+                addCapitalOfferDecider(amount, tradexButtonsID, propertiesHolder);
+                removeCapitalOfferGUI(tradex, tradexButtonsID);
+            }
+        }
+    }
+
+    function addPropDecider(prop, buttonID, propertiesHolder) {
+        //This decides whether the trader or tradee is adding a property. This needs to be done
+        //so the tradee can be requested
+        if(buttonID.substring(0, 6) == "trader") {
+            addProp(prop, buttonID, propertiesHolder);
+        } else if(buttonID.substring(0, 6) == "tradee") {
+            if(confirm("Player requests " + properties[prop].name)) {
+                addProp(prop, buttonID, propertiesHolder);
+            } else {
+                alert("Player rejected your request");
+            }
+        }
+    }
+
+    function addProp(prop, buttonID, propertiesHolder) {
+        //This adds the property to the offer div in the center. It needs to know if it's the trader
+        //or tradee offering so it can place it in either the top half or the bottom half
+
+        var traderOrTradee = buttonID.substring(0, 6).concat("OfferHolder");
+        var offeredAsset = document.getElementById(buttonID).cloneNode();
+        document.getElementById(buttonID).setAttribute("disabled", "disabled");
+        document.getElementById(buttonID).style.backgroundColor = "#c2c2a3";
+        offeredAsset.style.top = (10 + (60 * document.getElementById(traderOrTradee).childNodes.length)).toString().concat("px");
+        //Cloning the button that was pressed in the trader/tradee divs
+        offeredAsset.id = buttonID.concat("clone");
+        offeredAsset.style.backgroundColor = "#0099ff";
+        offeredAsset.removeAttribute("disabled");
+        offeredAsset.innerHTML = properties[prop].name;
+        //Placing it in the corresponding offer div
+        document.getElementById(traderOrTradee).appendChild(offeredAsset);
+
+        var cancelOfferOfAsset = document.createElement("button");
+        cancelOfferOfAsset.style.height = "15px";
+        cancelOfferOfAsset.style.width = "15px";
+        cancelOfferOfAsset.style.position = "absolute";
+        cancelOfferOfAsset.style.right = "0px";
+        cancelOfferOfAsset.style.top = "0px";
+        cancelOfferOfAsset.style.borderRadius = "2px";
+        cancelOfferOfAsset.style.backgroundImage = "url('images/cancel.png')";
+        cancelOfferOfAsset.style.backgroundSize = "12px 12px";
+        offeredAsset.appendChild(cancelOfferOfAsset);
+        cancelOfferOfAsset.addEventListener("click", removeAssetOffer.bind(null, offeredAsset.id, buttonID, propertiesHolder), false);
+        
+        if(document.getElementById("traderOfferHolder").childNodes.length > 0 && document.getElementById("tradeeOfferHolder").childNodes.length > 0) {
+            document.getElementById("finishOfferButton").removeAttribute("disabled");
+            document.getElementById("finishOfferButton").style.backgroundColor = "#0099ff";
+        }
+    }
+
+    function addJailCardDecider(buttonID) {
+        //This decides if either the trader or tradee is offering a jail card, again so the tradee 
+        //can bee requested
+        if(buttonID.substring(0, 6) == "trader") {
+            addJailCard(buttonID);
+        } else if(buttonID.substring(0, 6) == "tradee") {
+            if(confirm("Player requests a jail card")) {
+                addJailCard(buttonID);
+            } else {
+                alert("Player rejected your request for a jail card");
+            }
+        }
+    }
+
+    function addJailCard(buttonID) {
+        //Doing the same job as addProp only for jail cards
+
+        var traderOrTradee = buttonID.substring(0, 6).concat("OfferHolder");
+        var offeredAsset = document.getElementById(buttonID).cloneNode();
+        document.getElementById(buttonID).setAttribute("disabled", "disabled");
+        document.getElementById(buttonID).style.backgroundColor = "#c2c2a3";
+        offeredAsset.style.top = (10 + (60 * document.getElementById(traderOrTradee).childNodes.length)).toString().concat("px");
+        offeredAsset.innerHTML = "JAIL CARD";
+        offeredAsset.style.backgroundColor = "#0099ff";
+        offeredAsset.removeAttribute("disabled");
+        offeredAsset.id = buttonID.concat("clone");
+        document.getElementById(traderOrTradee).appendChild(offeredAsset);
+
+        var cancelOfferOfAsset = document.createElement("button");
+        cancelOfferOfAsset.style.height = "15px";
+        cancelOfferOfAsset.style.width = "15px";
+        cancelOfferOfAsset.style.position = "absolute";
+        cancelOfferOfAsset.style.right = "0px";
+        cancelOfferOfAsset.style.top = "0px";
+        cancelOfferOfAsset.style.borderRadius = "2px";
+        cancelOfferOfAsset.style.backgroundImage = "url('images/cancel.png')";
+        cancelOfferOfAsset.style.backgroundSize = "12px 12px";
+        offeredAsset.appendChild(cancelOfferOfAsset);
+        cancelOfferOfAsset.addEventListener("click", removeAssetOffer.bind(null, offeredAsset.id, buttonID, propertiesHolder), false);
+        
+        if(document.getElementById("traderOfferHolder").childNodes.length > 0 && document.getElementById("tradeeOfferHolder").childNodes.length > 0) {
+            document.getElementById("finishOfferButton").removeAttribute("disabled");
+            document.getElementById("finishOfferButton").style.backgroundColor = "#0099ff";
+        }
+    }
+
+    function addCapitalOfferDecider(amount, buttonID, propertiesHolder) {
+        //Again deciding who it was that offered
+        if(buttonID.substring(0, 6) == "trader") {
+            addCapitalOffer(amount, buttonID, propertiesHolder);
+        } else if(buttonID.substring(0, 6) == "tradee") {
+            if(confirm("Player requests " + amount)) {
+                addCapitalOffer(amount, buttonID, propertiesHolder);
+            } else {
+                alert("Player rejected your request for " + amount);
+            }
+        }
+    }
+
+    function addCapitalOffer(amount, buttonID, propertiesHolder) {
+        //This is where the money offer is actually placed in the offer div. This one is a little
+        //more complicated because we are always making the money offer be at the top of the offer 
+        //div. If there is already offers in the div, we need to remove them, store them in a list,
+        //and then add them back into the offer div under the money offer
+        var traderOrTradee = buttonID.substring(0, 6).concat("OfferHolder");
+        if(document.getElementById(traderOrTradee).childNodes.length == 0) {
+            //If there's no property or jail card offers we can just add it straight in
+            if(document.getElementById("capital".concat(traderOrTradee))) {
+                //If there's already a money offer 
+                var oldAmount = parseInt(document.getElementById("capital".concat(traderOrTradee)).innerHTML);
+                oldAmount += amount;
+                document.getElementById("capital".concat(traderOrTradee)).innerHTML = oldAmount;
+
+                var cancelCapitalOffer = document.createElement("button");
+                cancelCapitalOffer.style.height = "15px";
+                cancelCapitalOffer.style.width = "15px";
+                cancelCapitalOffer.style.position = "absolute";
+                cancelCapitalOffer.style.right = "0px";
+                cancelCapitalOffer.style.top = "0px";
+                cancelCapitalOffer.style.borderRadius = "2px";
+                cancelCapitalOffer.style.backgroundImage = "url('images/cancel.png')";
+                cancelCapitalOffer.style.backgroundSize = "12px 12px";
+                document.getElementById("capital".concat(traderOrTradee)).appendChild(cancelCapitalOffer);
+                cancelCapitalOffer.addEventListener("click", removeCapitalOffer.bind(null, capitalOffered.id, propertiesHolder), false);
+            } else {
+                //If there isn't a money offer already
+                var capitalOffered = document.createElement("button");
+                capitalOffered.id = "capital".concat(traderOrTradee);
+                capitalOffered.style.height = "50px";
+                capitalOffered.style.width = "200px";
+                capitalOffered.style.position = "absolute";
+                capitalOffered.style.top = "10px";
+                capitalOffered.style.left = "10px";
+                capitalOffered.innerHTML = amount;
+                capitalOffered.style.textAlign = "center";
+                capitalOffered.style.verticalAlign = "middle";
+                capitalOffered.style.lineHeight = "50px";
+                capitalOffered.style.borderRadius = "10px";
+                capitalOffered.style.backgroundColor = "#0099ff";
+                capitalOffered.style.borderColor = "black";     
+                capitalOffered.style.fontSize = "20px";
+                capitalOffered.style.fontFamily = "bold";
+                document.getElementById(traderOrTradee).appendChild(capitalOffered);
+
+                var cancelCapitalOffer = document.createElement("button");
+                cancelCapitalOffer.style.height = "15px";
+                cancelCapitalOffer.style.width = "15px";
+                cancelCapitalOffer.style.position = "absolute";
+                cancelCapitalOffer.style.right = "0px";
+                cancelCapitalOffer.style.top = "0px";
+                cancelCapitalOffer.style.borderRadius = "2px";
+                cancelCapitalOffer.style.backgroundImage = "url('images/cancel.png')";
+                cancelCapitalOffer.style.backgroundSize = "12px 12px";
+                capitalOffered.appendChild(cancelCapitalOffer);
+                cancelCapitalOffer.addEventListener("click", removeCapitalOffer.bind(null, capitalOffered.id, propertiesHolder), false);
+            }
+        } else {
+            //Here is where we get all the previously offered properties, storing them so we can
+            //re-add them after adding the money offer
+            var oldAmount = 0;
+            var propertyButtonIDs = [];
+            for(var i = 0; i < document.getElementById(traderOrTradee).childNodes.length; i++) {
+                if(document.getElementById(traderOrTradee).childNodes[i].id != "capital".concat(traderOrTradee)) {
+                    //We need the original ids of the properties so we can re-add them through the 
+                    //cling function. We do this by removing the 'clone' part at the end of the id
+                    //(what's happening in the line below)
+                    var convertToOriginalID = document.getElementById(traderOrTradee).childNodes[i].id.substring(0, document.getElementById(traderOrTradee).childNodes[i].id.length-5);
+                    propertyButtonIDs.push(convertToOriginalID);
+                }
+            }
+
+            for(var i = 0; i < propertyButtonIDs.length; i++) {
+                //now we need to get the actual clone button from the offers div in the center so
+                //we can remove it
+                var assetToRemove = document.getElementById(propertyButtonIDs[i].concat("clone"));
+                assetToRemove.parentNode.removeChild(assetToRemove);
+            }
+
+            if(document.getElementById("capital".concat(traderOrTradee))) {
+                //And here is just updating or adding the money offer label (button)
+                oldAmount = parseInt(document.getElementById("capital".concat(traderOrTradee)).innerHTML);
+                oldAmount += amount;
+                document.getElementById("capital".concat(traderOrTradee)).innerHTML = oldAmount;
+
+                var cancelCapitalOffer = document.createElement("button");
+                cancelCapitalOffer.style.height = "15px";
+                cancelCapitalOffer.style.width = "15px";
+                cancelCapitalOffer.style.position = "absolute";
+                cancelCapitalOffer.style.right = "0px";
+                cancelCapitalOffer.style.top = "0px";
+                cancelCapitalOffer.style.borderRadius = "2px";
+                cancelCapitalOffer.style.backgroundImage = "url('images/cancel.png')";
+                cancelCapitalOffer.style.backgroundSize = "12px 12px";
+                console.log(document.getElementById("capital".concat(traderOrTradee)));
+                document.getElementById("capital".concat(traderOrTradee)).appendChild(cancelCapitalOffer);
+                cancelCapitalOffer.addEventListener("click", removeCapitalOffer.bind(null, "capital".concat(traderOrTradee), propertiesHolder), false);
+            } else {
+                var capitalOffered = document.createElement("button");
+                capitalOffered.id = "capital".concat(traderOrTradee);
+                capitalOffered.style.height = "50px";
+                capitalOffered.style.width = "200px";
+                capitalOffered.style.position = "absolute";
+                capitalOffered.style.top = "10px";
+                capitalOffered.style.left = "10px";
+                capitalOffered.innerHTML = amount;
+                capitalOffered.style.textAlign = "center";
+                capitalOffered.style.verticalAlign = "middle";
+                capitalOffered.style.lineHeight = "50px";
+                capitalOffered.style.borderRadius = "10px";
+                capitalOffered.style.backgroundColor = "#0099ff";
+                capitalOffered.style.borderColor = "black";     
+                capitalOffered.style.fontSize = "20px";
+                capitalOffered.style.fontFamily = "bold";
+                document.getElementById(traderOrTradee).appendChild(capitalOffered);
+
+                var cancelCapitalOffer = document.createElement("button");
+                cancelCapitalOffer.style.height = "15px";
+                cancelCapitalOffer.style.width = "15px";
+                cancelCapitalOffer.style.position = "absolute";
+                cancelCapitalOffer.style.right = "0px";
+                cancelCapitalOffer.style.top = "0px";
+                cancelCapitalOffer.style.borderRadius = "2px";
+                cancelCapitalOffer.style.backgroundImage = "url('images/cancel.png')";
+                cancelCapitalOffer.style.backgroundSize = "12px 12px";
+                capitalOffered.appendChild(cancelCapitalOffer);
+                cancelCapitalOffer.addEventListener("click", removeCapitalOffer.bind(null, capitalOffered.id, propertiesHolder), false);
+            }
+
+            if(traderOrTradee.substring(0, 6) == "trader") {
+                //If it was the tradee ones then putting them all through here would trigger the 
+                //confirm again and we don't need to do that
+                redoOfferHolder(propertyButtonIDs, propertiesHolder);
+            } else {
+                //Have to do this so it doesn't ask player to accept them again
+                for(var i = 0; i < propertyButtonIDs.length; i++) {
+                    if(propertyButtonIDs[i].substring(6, 10) == "Jail") {
+                        addJailCard(propertyButtonIDs[i]);
+                    } else {
+                        addProp(propertiesHolder[propertyButtonIDs[i]], propertyButtonIDs[i], propertiesHolder);
+                    }
+                }
+            }
+        }
+
+        if(document.getElementById("traderOfferHolder").childNodes.length > 0 && document.getElementById("tradeeOfferHolder").childNodes.length > 0) {
+            document.getElementById("finishOfferButton").removeAttribute("disabled");
+            document.getElementById("finishOfferButton").style.backgroundColor = "#0099ff";
+        }
+    }
+
+    function removeAssetOffer(assetID, originalID, propertiesHolder) {
+        //This takes the property the player wanted to trade and decided against it and returns it to
+        //their holder div
+        var traderOrTradee = assetID.substring(0, 6).concat("OfferHolder");
+        //Reenabling the button in the trader's/tradee's holder div so they can er-offer it if they 
+        //want
+        document.getElementById(originalID).removeAttribute("disabled");
+        document.getElementById(originalID).style.backgroundColor = "#0099ff";
+
+        //We need to take note of the other properties that are still getting offered so we can 
+        //clean up the offer div
+        var assetsStillIncluded = [];
+        var start = 0;
+        if(document.getElementById(traderOrTradee).childNodes[0].id.substring(0, 7) == "capital") {
+            //If a money offer has been made, this will still be the first offer in the div after
+            //the clean up so no point removing it
+            start = 1;
+        }
+
+        for(var i = start; i < document.getElementById(traderOrTradee).childNodes.length; i++) {
+            //Need to get the original ID of all the cloned properties so we can re-clone them
+            if(document.getElementById(traderOrTradee).childNodes[i].id != assetID) {
+                //Same deal here with getting the original ID as above
+                var convertToOriginalID = document.getElementById(traderOrTradee).childNodes[i].id.substring(0, document.getElementById(traderOrTradee).childNodes[i].id.length-5);
+                assetsStillIncluded.push(convertToOriginalID);
+            }
+        }
+
+        for(var i = start; i < assetsStillIncluded.length; i++) {
+            //Removing the cloned buttons from the offer div
+            var assetToRemove = document.getElementById(assetsStillIncluded[i].concat("clone"));
+            assetToRemove.parentNode.removeChild(assetToRemove);
+        }
+
+        //Removing the property that we actually want to get rid of
+        var lastAsset = document.getElementById(assetID);
+        lastAsset.parentNode.removeChild(lastAsset);
+
+        if(document.getElementById("traderOfferHolder").childNodes.length == 0 || document.getElementById("tradeeOfferHolder").childNodes.length == 0) {
+            //This disables the offer button if their is one player without an item being offered
+            document.getElementById("finishOfferButton").setAttribute("disabled", "disabled");
+            document.getElementById("finishOfferButton").style.backgroundColor = "#c2c2a3";
+        }
+
+        //Call this function to clean up the offers div
+        redoOfferHolder(assetsStillIncluded, propertiesHolder);
+    }
+
+    function removeCapitalOffer(tradex, propertiesHolder) {
+        //This just removes the offered capital from the offers div
+        var parentN = document.getElementById(tradex).parentNode;
+        parentN.removeChild(document.getElementById(tradex));
+
+        if(parentN.childNodes.length > 0) {
+            //If there's more than one offer on the table, we need to take note of their buttonIDs
+            //so we add them back in
+            propertyButtonIDs = [];
+
+            for(var i = 0; i < parentN.childNodes.length; i++) {
+                //Again getting the original id so we can re-clone it
+                var convertToOriginalID = parentN.childNodes[i].id.substring(0, parentN.childNodes[i].id.length-5);
+                propertyButtonIDs.push(convertToOriginalID);
+            }
+
+            for(var i = 0; i < propertyButtonIDs.length; i++) {
+                //Then removing the clones from the offers div
+                var assetToRemove = document.getElementById(propertyButtonIDs[i].concat("clone"));
+                assetToRemove.parentNode.removeChild(assetToRemove);
+            }
+
+            //cleaning up again
+            redoOfferHolder(propertyButtonIDs, propertiesHolder);
+        }
+
+        if(document.getElementById("traderOfferHolder").childNodes.length == 0 || document.getElementById("tradeeOfferHolder").childNodes.length == 0) {
+            //Deciding whether to turn off the offer button based on how many offers are being made
+            document.getElementById("finishOfferButton").setAttribute("disabled", "disabled");
+            document.getElementById("finishOfferButton").style.backgroundColor = "#c2c2a3";
+        }
+    }
+
+    function redoOfferHolder(assets, propertiesHolder) {
+        /*
+        * This function is for cleaning up the offers div when a player removes an offer. It takes 
+        * the buttonIDs that need to be re-added
+        */
+
+        if(assets.length > 0) {
+            //The innerHTML was being weird so have to go back to the actual property to get its name
+            document.getElementById(assets[0]).name = document.getElementById(assets[0]).innerHTML;
+        } 
+        
+        if(document.getElementById("traderOfferHolder").childNodes.length == 0 || document.getElementById("tradeeOfferHolder").childNodes.length == 0) {
+            //Again deciding on whether to disable the offer button due to lack of offers
+            document.getElementById("finishOfferButton").setAttribute("disabled", "disabled");
+            document.getElementById("finishOfferButton").style.backgroundColor = "#c2c2a3";
+        }
+
+        for(var i = 0; i < assets.length; i++) {
+            //Here we add back the properties/jail cards
+            if(assets[i].substring(6, 10) == "Jail") {
+                addJailCardDecider(assets[i]);
+            } else {
+                addPropDecider(propertiesHolder[assets[i]], assets[i], propertiesHolder);
+            }
+        }
+    }
+
+    function proposeTrade(tradex, trader, tradee, propertiesHolder, enabledButton) {
+        //This is called when one of the players wants to finish the trade with the current offers
+        var traderOffers = [];
+        var tradeeOffers = [];
+        if(confirm("Do you accept this trade?")) {
+            //If the other player accepts the trade then we need to get all of the trader and tradee
+            //assets so we can pass them onto the function that finishes the trade
+            for(var i = 0; i < document.getElementById("traderOfferHolder").childNodes.length; i++) {
+                //We need to convert the clone's id back into the original so we can use propetiesHolder
+                //to get back to the actual tileID
+                var convertToOriginalID;
+                if(document.getElementById("traderOfferHolder").childNodes[i].id.substring(0, 7) == "capital") {
+                    //This is for checking if it's the money offer
+                    convertToOriginalID = document.getElementById("traderOfferHolder").childNodes[i].id;
+                } else {
+                    convertToOriginalID = document.getElementById("traderOfferHolder").childNodes[i].id.substring(0, document.getElementById("traderOfferHolder").childNodes[i].id.length-5);
+                }
+                //adding the property to the trader offer list
+                traderOffers.push(convertToOriginalID);
+            }
+    
+            //This is the same as above just for the tradee offers
+            for(var i = 0; i < document.getElementById("tradeeOfferHolder").childNodes.length; i++) {
+                var convertToOriginalID;
+                if(document.getElementById("tradeeOfferHolder").childNodes[i].id.substring(0, 7) == "capital") {
+                    convertToOriginalID = document.getElementById("tradeeOfferHolder").childNodes[i].id;
+                } else {
+                    convertToOriginalID = document.getElementById("tradeeOfferHolder").childNodes[i].id.substring(0, document.getElementById("tradeeOfferHolder").childNodes[i].id.length-5);
+                }
+                tradeeOffers.push(convertToOriginalID);
+            }
+
+            //Passing the trader object, tradee object, the trader's offers, tradee's offers
+            // the propertiesHolder dictionary, and the button (roll dice/end turn) that needs to be
+            //reactivated
+            finishTrade(trader, tradee, propertiesHolder, traderOffers, tradeeOffers, enabledButton);
+        }
+        
+    }
+
+    function finishTrade(trader, tradee, propertiesHolder, traderOffers, tradeeOffers, enabledButton) {
+        /*
+        * Here is where the trade actually finishes and the properties are traded
+        */
+        //This holds the assets that need to be removed from the trader object
+        var removeFromTraderAssets = [];
+        //Same but for tradee
+        var removeFromTradeeAssets = [];
+        //Need to remove the properties from the playerObj.properties[colour/railroad/utilities] as well
+        var traderColourHolder = [];
+        var tradeeColourHolder = [];        
+        var traderRailHolder = [];
+        var tradeeRailHolder = [];
+        var traderUtilHolder = [];
+        var tradeeUtilHolder = [];
+        
+        for(var i = 0; i < traderOffers.length; i++) {
+            //This gives the tradee all the properties that the trader offered
+            if(traderOffers[i].substring(6, 10) == "Jail") {
+                //This is if it's a jail card
+                tradee.getOutOfJail++;
+                trader.getOutOfJail--;
+            } else if(traderOffers[i].substring(0, 7) == "capital") {
+                //This is if it'money
+                tradee.money += parseInt(document.getElementById(traderOffers[i]).innerHTML);
+                trader.money -= parseInt(document.getElementById(traderOffers[i]).innerHTML);
+            } else {
+                //This is if it's a property. propertiesHolder[traderOffers[i]] converts the button
+                //id back into the tileID
+                properties[propertiesHolder[traderOffers[i]]].owner = tradee;
+                removeFromTraderAssets.push(propertiesHolder[traderOffers[i]]);
+                tradee.assets.push(propertiesHolder[traderOffers[i]]);
+                //We need to decide whether it is a colour, railroad, or utility property
+                if(properties[propertiesHolder[traderOffers[i]]].type == "colour") {
+                    traderColourHolder.push(propertiesHolder[traderOffers[i]]);
+                    tradee.properties[properties[propertiesHolder[traderOffers[i]]].colour].push(propertiesHolder[traderOffers[i]]);
+                } else if(properties[propertiesHolder[traderOffers[i]]].type == "railroad") {
+                    traderRailHolder.push(propertiesHolder[traderOffers[i]]);
+                    tradee.properties[properties[propertiesHolder[traderOffers[i]]].type].push(propertiesHolder[traderOffers[i]]);
+                } else if(properties[propertiesHolder[traderOffers[i]]].type == "utility") {
+                    traderUtilHolder.push(propertiesHolder[traderOffers[i]]);
+                    tradee.properties["utilities"].push(propertiesHolder[traderOffers[i]]);
+                }
+                //Just traded checks whether the property traded was mortgaged or not
+                justTraded(tradee, propertiesHolder[traderOffers[i]]);
+            }
+            
+        }
+
+        //This is the same as above but for the tradee
+        for(var i = 0; i < tradeeOffers.length; i++) {
+            if(tradeeOffers[i].substring(6, 10) == "Jail") {
+                trader.getOutOfJail++;
+                tradee.getOutOfJail--;
+            } else if(tradeeOffers[i].substring(0, 7) == "capital") {
+                trader.money += parseInt(document.getElementById(traderOffers[i]).innerHTML);
+                tradee.money -= parseInt(document.getElementById(traderOffers[i]).innerHTML);
+            } else {
+                properties[propertiesHolder[tradeeOffers[i]]].owner = trader;
+                removeFromTradeeAssets.push(propertiesHolder[tradeeOffers[i]]);
+                trader.assets.push(propertiesHolder[tradeeOffers[i]]);
+                if(properties[propertiesHolder[tradeeOffers[i]]].type == "colour") {
+                    tradeeColourHolder.push(propertiesHolder[tradeeOffers[i]]);
+                    trader.properties[properties[propertiesHolder[tradeeOffers[i]]].colour].push(propertiesHolder[tradeeOffers[i]]);
+                } else if(properties[propertiesHolder[tradeeOffers[i]]].type == "railroad") {
+                    tradeeRailHolder.push(propertiesHolder[tradeeOffers[i]]);
+                    trader.properties[properties[propertiesHolder[tradeeOffers[i]]].type].push(propertiesHolder[tradeeOffers[i]]);
+                } else if(properties[propertiesHolder[tradeeOffers[i]]].type == "utility") {
+                    tradeeUtilHolder.push(propertiesHolder[tradeeOffers[i]]);
+                    trader.properties["utilities"].push(propertiesHolder[tradeeOffers[i]]);
+                }
+                justTraded(trader, propertiesHolder[tradeeOffers[i]]);
+            }
+        }
+        
+        //Here is where we delete the properties from the old owner's object
+        var assetsHolder = [];
+        for(var i = 0; i < trader.assets.length; i++) {
+            //This removes them from the assets list
+            var keep = true;
+            for(var j = 0; j < removeFromTraderAssets.length; j++) {
+                //If the property matches any of the ones in the remove list, then it is not 
+                //added into the list that replaces the player's assets
+                if(trader.assets[i] == removeFromTraderAssets[j]) {
+                    keep = false;
+                    break;
+                }
+            }
+            if(keep) {
+                assetsHolder.push(trader.assets[i]);
+            }
+        }
+        trader.assets = assetsHolder;
+
+        //This does the same job as above but for the colours folders in the player.properties dictionary
+        for(var i = 0; i < traderColourHolder.length; i++) {
+            var keepingThisColour = [];
+            for(var j = 0; j < trader.properties[properties[traderColourHolder[i]].colour].length; j++) {
+                //Adding every property that isn't in the removing list into teh list that will replace the
+                //corresponding one in the player.propertis dictionary
+                if(trader.properties[properties[traderColourHolder[i]].colour][j] != traderColourHolder[i]) {
+                    keepingThisColour.push(trader.properties[properties[traderColourHolder[i]].colour][j]);
+                }
+            }
+            trader.properties[properties[traderColourHolder[i]].colour] = keepingThisColour;
+        }
+
+        //Same as above just for railroads
+        for(var i = 0; i < traderRailHolder.length; i++) {
+            var keepingThisRail = [];
+            for(var j = 0; j < trader.properties["railroad"].length; j++) {
+                if(trader.properties["railroad"][j] != traderRailHolder[i]) {
+                    keepingThisRail.push(trader.properties["railroad"][j]);
+                }
+            }
+            trader.properties["railroad"] = keepingThisRail;
+        }
+
+        //Again but for utilities
+        for(var i = 0; i < traderUtilHolder.length; i++) {
+            var keepingThisRound = [];
+
+            for(var j = 0; j < trader.properties["utilities"].length; j++) {
+                if(trader.properties["utilities"][j] != traderUtilHolder[i]) {
+                    keepingThisRound.push(trader.properties["utilities"][j]);
+                }
+            }
+            trader.properties["utilities"] = keepingThisRound;
+        }
+
+        //And now just repeating it for the tradee
+        assetsHolder = [];
+        for(var i = 0; i < tradee.assets.length; i++) {
+            var keep = true;
+            for(var j = 0; j < removeFromTradeeAssets.length; j++) {
+                if(tradee.assets[i] == removeFromTradeeAssets[j]) {
+                    keep = false;
+                    break;
+                }
+            }
+            if(keep) {
+                assetsHolder.push(tradee.assets[i]);
+            }
+        }
+        tradee.assets = assetsHolder;
+        
+        for(var i = 0; i < tradeeColourHolder.length; i++) {
+            var keepingThisColour = [];
+            for(var j = 0; j < tradee.properties[properties[tradeeColourHolder[i]].colour].length; j++) {
+                if(tradee.properties[properties[tradeeColourHolder[i]].colour][j] != tradeeColourHolder[i]) {
+                    keepingThisColour.push(tradee.properties[properties[tradeeColourHolder[i]].colour][j]);
+                }
+            }
+            tradee.properties[properties[tradeeColourHolder[i]].colour] = keepingThisColour;
+        }
+
+        for(var i = 0; i < tradeeRailHolder.length; i++) {
+            var keepingThisRail = [];
+            for(var j = 0; j < tradee.properties["railroad"].length; j++) {
+                if(tradee.properties["railroad"][j] != tradeeRailHolder[i]) {
+                    keepingThisRail.push(tradee.properties["railroad"][j]);
+                }
+            }
+            tradee.properties["railroad"] = keepingThisRail;
+        }
+
+        for(var i = 0; i < tradeeUtilHolder.length; i++) {
+            var keepingThisRound = [];
+            for(var j = 0; j < tradee.properties["utilities"].length; j++) {
+                if(tradee.properties["utilities"][j] != tradeeUtilHolder[i]) {
+                    keepingThisRound.push(tradee.properties["utilities"][j]);
+                }
+            }
+            tradee.properties["utilities"] = keepingThisRound;
+        }
+
+        removeTradeGUI(enabledButton);
+    }
+
+    function removeTradeGUI(enabledButton) {
+        //Just removing the GUI and reenabling the appropriate button
+        var trade = document.getElementById("tradeOuter");
+        trade.parentNode.removeChild(trade);
+        document.getElementById(enabledButton).removeAttribute("disabled");
+        enableBuildButton();
     }
 
     function checkIfStillBankrupt(playerObj) {
-        if(playerObj.money <= deficitAmount) {
-            iDeclareBankruptcy(playerObj);
+        //This checks if the player is still bankrupt after doing something to gain money during bankruptcy
+        if(playerObj.money <= 0) {
+            bankrupt(playerObj);
         } else {
             enableButton("endTurn");
-            deficitAmount = 0;
         }
     }
 
     function bankrupt(playerObj) {
         var cur_pos = playerObj.position;
-        if(cur_pos != "0000" || cur_pos != "0002" || cur_pos != "0004" || cur_pos != "0007" || cur_pos != "0010" || cur_pos != "0710" || cur_pos != "1010" || cur_pos != "1008" || cur_pos != "1000" || cur_pos != "0700" ||cur_pos != "0400" || cur_pos != "0200") {
-            if(properties[cur_pos].owner != null && properties[cur_pos].owner != playerObj) {
-                //Must give the owner of this tile all of the player's properties
-                for(var i = 0; i < playerObj.assets.length; i++) {
-                    properties[playerObj.assets[i]].owner = properties[cur_pos].owner;
-                    properties[cur_pos].owner.assets.push(playerObj.assets[i]);
-                    if(properties[playerObj.assets[i]].type == "colour") {
-                        properties[cur_pos].owner.properties[properties[playerObj.assets[i]].colour].push(playerObj.assets[i]);
-                    } else if(properties[playerObj.assets[i]].type == "railroad") {
-                        properties[cur_pos].owner.properties["railroad"].push(playerObj.assets[i]);
-                    } else if(properties[playerObj.assets[i]].type == "utility") {
-                        properties[cur_pos].owner.properties["utilities"].push(playerObj.assets[i]);
+        /*
+        * During the set up of the GUI, it checks whether the player can actually get unbankrupt,
+        * returning true or false depending
+        */
+        if(!setUpBankruptGUI(playerObj)) {
+            //All of these positions are the ones that are unownable
+            if(cur_pos != "0000" || cur_pos != "0002" || cur_pos != "0004" || cur_pos != "0007" || cur_pos != "0010" || cur_pos != "0710" || cur_pos != "1010" || cur_pos != "1008" || cur_pos != "1000" || cur_pos != "0700" ||cur_pos != "0400" || cur_pos != "0200") {
+                if(properties[cur_pos].owner != null && properties[cur_pos].owner != playerObj) {
+                    //Must give the owner of this tile all of the player's properties
+                    for(var i = 0; i < playerObj.assets.length; i++) {
+                        //Setting the new owner in the property dictionary
+                        properties[playerObj.assets[i]].owner = properties[cur_pos].owner;
+                        //Adding it to the new owner's assets
+                        properties[cur_pos].owner.assets.push(playerObj.assets[i]);
+                        //Adding it to the appropriate field in the player.properties dictionary
+                        if(properties[playerObj.assets[i]].type == "colour") {
+                            properties[cur_pos].owner.properties[properties[playerObj.assets[i]].colour].push(playerObj.assets[i]);
+                        } else if(properties[playerObj.assets[i]].type == "railroad") {
+                            properties[cur_pos].owner.properties["railroad"].push(playerObj.assets[i]);
+                        } else if(properties[playerObj.assets[i]].type == "utility") {
+                            properties[cur_pos].owner.properties["utilities"].push(playerObj.assets[i]);
+                        }
                     }
+                    //Removes the player from the game (off the board)
+                    removePlayer(playerObj);
+                } else {
+                    //Must auction off all properties
+                    //This is the number of properties to auction off
+                    numberOfAuctions = playerObj.assets.length-1;
+                    //This is for checking whether we need to check if the player is still bankrupt in auction
+                    currentlyBankrupting = true;
+                    bankruptingPlayer = playerObj;
+                    bankruptcyAuction(playerObj);
                 }
-                removePlayer(playerObj);
-            } else {
-                //Must auction off all properties
-                numberOfAuctions = playerObj.assets.length-1;
-                currentlyBankrupting = true;
-                bankruptingPlayer = playerObj;
-                bankruptcyAuction(playerObj);
             }
         }
     }
 
+    function setUpBankruptGUI(playerObj) {
+        /*
+        * This function decides whether the player is able to try and bail themselves out of bankruptcy
+        * or not. It gets all their mortgagable properties, their deveoped properties so they can sell
+        * the houses, and their jail cards. It also returns false if they have nothing
+        */
+        var mortgagableProperties = getMortgagableProperties(playerObj);
+        var propertiesWithHouses = getPropertiesWithHouse(playerObj, mortgagableProperties);
+        var numberOfJailCards = playerObj.getOutOfJail;
+
+        //You don't need to check if tehy have any houses because if they must have a mortgagable
+        //property in order to have houses
+        if(mortgagableProperties.length > 0 || numberOfJailCards > 0) {
+            //This is just creating the mortgaging div
+            if(mortgagableProperties.length > 0) {
+                var mortgagablePropetiesHolder = document.createElement("div");
+                mortgagablePropetiesHolder.id = "mortgagablePropetiesHolder";
+                mortgagablePropetiesHolder.style.position = "absolute";
+                mortgagablePropetiesHolder.style.height = "145px";
+                mortgagablePropetiesHolder.style.width = "250px";
+                if(mortgagableProperties.length > 1) {
+                    if(mortgagableProperties.length > 2) {
+                        mortgagablePropetiesHolder.style.overflowX = "hidden";
+                        mortgagablePropetiesHolder.style.overflowY = "scroll";
+                    }
+                } else {
+                    mortgagablePropetiesHolder.style.height = "100px";
+                }
+                mortgagablePropetiesHolder.style.top = "100px";
+                mortgagablePropetiesHolder.style.left = "50px";
+                mortgagablePropetiesHolder.style.border = "5px solid black";
+                mortgagablePropetiesHolder.style.borderRadius = "10px";
+                mortgagablePropetiesHolder.style.backgroundColor = "#00001a";
+                document.getElementById("body").appendChild(mortgagablePropetiesHolder);
+
+                var mortgageLabel = document.createElement("label");
+                mortgageLabel.id = "mortgageLabel";
+                mortgageLabel.style.height = "50px";
+                mortgageLabel.style.width = "250px";
+                mortgageLabel.style.position = "absolute";
+                mortgageLabel.style.left = "0px";
+                mortgageLabel.style.top = "0px";
+                mortgageLabel.style.backgroundColor = "black";
+                mortgageLabel.innerHTML = "MORTGAGE PROPERTY";
+                mortgageLabel.style.textAlign = "center";
+                mortgageLabel.style.color = "white";
+                mortgageLabel.style.verticalAlign = "middle";
+                mortgageLabel.style.lineHeight = "50px";
+                document.getElementById("mortgagablePropetiesHolder").appendChild(mortgageLabel);
+
+                for(var i = 0; i < mortgagableProperties.length; i++ ) {
+                    //Adding the mortgagable properties to the mortgage div
+                    var propertyButton = document.createElement("button");
+                    propertyButton.id = mortgagableProperties[i];
+                    propertyButton.innerHTML = properties[mortgagableProperties[i]].name.toUpperCase();
+                    propertyButton.style.top = (55 + ((40 * i) + (5 * i))).toString().concat("px");;
+                    propertyButton.style.left = "10px";
+                    propertyButton.style.width = "220px";
+                    propertyButton.style.height = "40px";
+                    propertyButton.style.position = "absolute";
+                    propertyButton.style.borderRadius = "10px";
+                    propertyButton.style.backgroundColor = "#0099ff";
+                    propertyButton.style.borderColor = "black";
+                    propertyButton.style.fontSize = "20px";
+                    propertyButton.style.fontFamily = "bold";
+                    document.getElementById("mortgagablePropetiesHolder").appendChild(propertyButton);
+                    propertyButton.addEventListener("click", mortgage.bind(null, playerObj, propertyButton.id), false);
+                }
+            }
+
+            if(propertiesWithHouses.length > 0) {
+                //Now setting up the sellable houses div
+                var housesHolder = document.createElement("div");
+                housesHolder.id = "housesHolder";
+                housesHolder.style.position = "absolute";
+                housesHolder.style.height = "145px";
+                housesHolder.style.width = "250px";
+                if(propertiesWithHouses.length > 1) {
+                    if(propertiesWithHouses.length > 2) {
+                        housesHolder.style.overflowX = "hidden";
+                        housesHolder.style.overflowY = "scroll";
+                    }
+                } else {
+                    housesHolder.style.height = "100px";
+                }
+                if(mortgagableProperties.length > 0) {
+                    housesHolder.style.top = (120 + parseInt((document.getElementById("mortgagablePropetiesHolder").style.height).substring(0, 3))).toString().concat("px");
+                } else {
+                    housesHolder.style.top = "155px";
+                }
+                housesHolder.style.left = "50px";
+                housesHolder.style.border = "5px solid black";
+                housesHolder.style.borderRadius = "10px";
+                housesHolder.style.backgroundColor = "#00001a";
+                document.getElementById("body").appendChild(housesHolder);
+
+                var houseLabel = document.createElement("label");
+                houseLabel.id = "houseLabel";
+                houseLabel.style.height = "50px";
+                houseLabel.style.width = "250px";
+                houseLabel.style.position = "absolute";
+                houseLabel.style.left = "0px";
+                houseLabel.style.top = "0px";
+                houseLabel.style.backgroundColor = "black";
+                houseLabel.innerHTML = "SELL HOUSE";
+                houseLabel.style.textAlign = "center";
+                houseLabel.style.color = "white";
+                houseLabel.style.verticalAlign = "middle";
+                houseLabel.style.lineHeight = "50px";
+                document.getElementById("housesHolder").appendChild(houseLabel);
+
+                for(var i = 0; i < propertiesWithHouses.length; i++) {
+                    //Adding the properties with sellable houses
+                    var propertyButton = document.createElement("button");
+                    propertyButton.id = propertiesWithHouses[i].concat("Houses");
+                    propertyButton.innerHTML = properties[propertiesWithHouses[i]].name.toUpperCase();
+                    propertyButton.style.top = (55 + ((40 * i) + (5 * i))).toString().concat("px");;
+                    propertyButton.style.left = "10px";
+                    propertyButton.style.width = "220px";
+                    propertyButton.style.height = "40px";
+                    propertyButton.style.position = "absolute";
+                    propertyButton.style.borderRadius = "10px";
+                    propertyButton.style.backgroundColor = "#0099ff";
+                    propertyButton.style.borderColor = "black";
+                    propertyButton.style.fontSize = "20px";
+                    propertyButton.style.fontFamily = "bold";
+                    document.getElementById("housesHolder").appendChild(propertyButton);
+                    propertyButton.addEventListener("click", removeNumberOfHouses.bind(null, playerObj, propertyButton.id.substring(0, 4)), false);
+                }
+            }
+
+            if(numberOfJailCards > 0) {
+                //Now just adding any jail cards that can be sold
+                var jailCardsHolder = document.createElement("div");
+                jailCardsHolder.id = "jailCardsHolder";
+                jailCardsHolder.style.position = "absolute";
+                jailCardsHolder.style.height = "145px";
+                jailCardsHolder.style.width = "250px";
+                if(numberOfJailCards > 1) {
+                    if(numberOfJailCards > 2) {
+                        jailCardsHolder.style.overflowX = "hidden";
+                        jailCardsHolder.style.overflowY = "scroll";
+                    }
+                } else {
+                    jailCardsHolder.style.height = "100px";
+                }
+                var distanceFromTop = 295;
+                if(propertiesWithHouses.length > 0) {
+                    distanceFromTop += parseInt((document.getElementById("housesHolder").style.height).substring(0, 3));
+                }
+                jailCardsHolder.style.top = distanceFromTop.toString().concat("px");
+                jailCardsHolder.style.left = "50px";
+                jailCardsHolder.style.border = "5px solid black";
+                jailCardsHolder.style.borderRadius = "10px";
+                jailCardsHolder.style.backgroundColor = "#00001a";
+                document.getElementById("body").appendChild(jailCardsHolder);
+    
+                var jailCardsLabel = document.createElement("label");
+                jailCardsLabel.id = "jailCardsLabel";
+                jailCardsLabel.style.height = "50px";
+                jailCardsLabel.style.width = "250px";
+                jailCardsLabel.style.position = "absolute";
+                jailCardsLabel.style.left = "0px";
+                jailCardsLabel.style.top = "0px";
+                jailCardsLabel.style.backgroundColor = "black";
+                jailCardsLabel.innerHTML = "SELL JAIL CARDS";
+                jailCardsLabel.style.textAlign = "center";
+                jailCardsLabel.style.color = "white";
+                jailCardsLabel.style.verticalAlign = "middle";
+                jailCardsLabel.style.lineHeight = "50px";
+                document.getElementById("jailCardsHolder").appendChild(jailCardsLabel);
+    
+                for(var i = 0; i < numberOfJailCards; i++) {
+                    var jailButton = document.createElement("button");
+                    jailButton.id = "jailCard"[i].concat(i.toString());
+                    jailButton.innerHTML = "JAIL CARD";
+                    jailButton.style.top = (55 + ((40 * i) + (5 * i))).toString().concat("px");;
+                    jailButton.style.left = "10px";
+                    jailButton.style.width = "220px";
+                    jailButton.style.height = "40px";
+                    jailButton.style.position = "absolute";
+                    jailButton.style.borderRadius = "10px";
+                    jailButton.style.backgroundColor = "#0099ff";
+                    jailButton.style.borderColor = "black";
+                    jailButton.style.fontSize = "20px";
+                    jailButton.style.fontFamily = "bold";
+                    document.getElementById("jailCardsHolder").appendChild(jailButton);
+                    jailButton.addEventListener("click", sellJailCard.bind(null, playerObj), false);
+                }
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function removeBankruptGUI() {
+        //Just removes the bankrupt GUI
+        if(document.getElementById("mortgagablePropetiesHolder")) {
+            var mortgagableHolder = document.getElementById("mortgagablePropetiesHolder");
+            mortgagableHolder.parentNode.removeChild(mortgagableHolder);
+        }
+
+        if(document.getElementById("housesHolder")) {
+            var housesHolder = document.getElementById("housesHolder");
+            housesHolder.parentNode.removeChild(housesHolder);
+        }
+
+        if(document.getElementById("jailCardsHolder")) {
+            var jailCardsHolder = document.getElementById("jailCardsHolder");
+            jailCardsHolder.parentNode.removeChild(jailCardsHolder);
+        }
+    }
+
+    function sellJailCard(playerObj) {
+        removeBankruptGUI();
+        playerObj.money += 100;
+        playerObj.getOutOfJail--;
+        checkIfStillBankrupt(playerObj);
+    }
+
+    function getMortgagableProperties(playerObj) {
+        //This returns a list of all the properties that the player can mortgage
+        mortgagableProperties = [];
+        for(var i = 0; i < playerObj.assets.length; i++) {
+            if(!properties[playerObj.assets[i]].mortgaged) {
+                mortgagableProperties.push(playerObj.assets[i]);
+            }
+        }
+        return mortgagableProperties;
+    }
+
+    function removeNumberOfHouses(playerObj, tileID) {
+        removeBankruptGUI();
+        //unPlaceHouse removes the house image from the tile and decrements the number of houses
+        unPlaceHouse(tileID);
+        checkIfStillBankrupt(playerObj);
+    }
+
+    function getPropertiesWithHouse(playerObj, propertiesList) {
+        //This returns a list of all the properties that have houses and are able to be removed. A
+        //house is able to be removed if by removing it you do not create a house gap of more than 
+        //one with any other property of the same colour set
+        propertiesWithHouses = [];
+        for(var i = 0; i < propertiesList.length; i++) {
+            if(properties[propertiesList[i]].numberOfHouses > 0 && checkIfAbleToRemoveHouse(playerObj, propertiesList[i])) {
+                propertiesWithHouses.push(propertiesList[i]);
+            }
+        }
+        return propertiesWithHouses;
+    }
+
     function bankruptcyAuction(playerObj) {
-        console.log("num: " + numberOfAuctions);
+        //Had to create a separate bankruptcy auction set up to go through all the properties
         if(numberOfAuctions >= 0) {
-            console.log(playerObj.assets[numberOfAuctions]);
             var outerAuction = document.createElement("div");
             outerAuction.id = "outerAuction";
             outerAuction.style.position = "absolute";
@@ -1753,11 +3043,11 @@ function playerCollect(amount){
             currentAuction = [0, playerObj.assets[numberOfAuctions]];
             currentBid = properties[playerObj.assets[numberOfAuctions]].price * 0.2; //Starting bid is 10% of price
             for(var i = 0; i < numPlayers; i++) {
+                //Adding the players to the auction
                 if(players[i] == playerObj) {
                     continue;
                 } else {
                     //Add them to the auction
-                    console.log(currentBid);
                     if(players[i].money > currentBid) {
                         currentAuction.push({player: players[i], stillIn: true});
                         currentAuction[0]++;
@@ -1767,31 +3057,22 @@ function playerCollect(amount){
                 }
             }
             currentBidder = 2;
-
-            //console.log(currentAuction);
-            //console.log("as: " + auctionStarter + " ca: " + currentAuction + " cbr: " + currentBidder + " cb: " + currentBid);
-            //Must be +2 to line up with the currentAuction list (cause the first two elements are 
-            //taken)
-            //Hiding and showing all appropriate GUIs
             checkAuctionAtStart();
         } else {
             //Remove player from the game
             console.log("Bankrupt player: " + playerObj.name);
-            //var outer = document.getElementById("outerAuction");
-            //outer.parentNode.removeChild(outer);
-            //var inner = document.getElementById("innerAuction");
-            //inner.parentNode.removeChild(inner);
             setTimeout(function() {
+                //Had to set a timeout because currentlyBankrupting was causing issues
                 numberOfAuctions = null;
                 currentlyBankrupting = false;
                 bankruptingPlayer = null;
-                //enableButton("endTurn");
                 removePlayer(playerObj);
             }, 800);
         }
     }
 
     function removePlayer(playerObj) {
+        //Removes the player from the game and cleans up the players list
         var playersTemp = [];
         for(var i = 0; i < numPlayers; i++) {
             if(players[i] == playerObj) {
@@ -1801,45 +3082,66 @@ function playerCollect(amount){
             }
         }
         players = playersTemp;
-        //console.log(playerObj);
         playerObj.id.parentNode.removeChild(playerObj.id);
         numPlayers--;
-        deficitAmount = 0;
-        console.log(players);
-        console.log(turn);
         enableButton("rollDice");
     }
 
     function showMortgageableProps() {
+        /*
+        * This is used for show casing which properties the player can currently mortgage. All it takes
+        * is for the player to own th eproperty and for it not to be mortgaged already. It also takes 
+        * the already mortgaged properties and keeps track of them so the player can buy them back from
+        * the bank
+        */
         document.getElementById("showMortgageButton").setAttribute("disabled", "disabled");
 
-        console.log(qualifiedTiles);
-        console.log(players[turn]);
+        var mortgagedProperties = [];
+
         for(var i = 0; i < players[turn].assets.length; i++) {
             if(!properties[players[turn].assets[i]].mortgaged) {
                 qualifiedTiles.push(players[turn].assets[i]);
+            } else {
+                mortgagedProperties.push(players[turn].assets[i]);
             }
         }
 
+        //Setting up the GUI
         var mortgageHolder = document.createElement("div");
         mortgageHolder.id = "mortgageHolder";
         mortgageHolder.style.position = "absolute";
-        mortgageHolder.style.height = "95px";
-        if(qualifiedTiles.length > 2) {
-            mortgageHolder.style.width = "250px";
-            mortgageHolder.style.overflowY = "scroll";
-        } else {
-            mortgageHolder.style.width = "240px";
-            if(qualifiedTiles.length == 1) {
-                mortgageHolder.style.height = "50px";
+        mortgageHolder.style.height = "155px";
+        mortgageHolder.style.width = "240px";
+        if(qualifiedTiles.length > 1) {
+            if(qualifiedTiles.length > 2) {
+                mortgageHolder.style.overflowX = "hidden";
+                mortgageHolder.style.overflowY = "scroll";
+                mortgageHolder.style.width = "250px";
             }
+        } else {
+            mortgageHolder.style.height = "100px";
         }
-        mortgageHolder.style.top = "35%";
-        mortgageHolder.style.left = "5%";
+        mortgageHolder.style.top = "250px";
+        mortgageHolder.style.left = "50px";
         mortgageHolder.style.border = "5px solid black";
         mortgageHolder.style.borderRadius = "10px";
         mortgageHolder.style.backgroundColor = "#00001a";
         document.getElementById("body").appendChild(mortgageHolder);
+
+        var mortgageLabel = document.createElement("label");
+        mortgageLabel.id = "mortgageLabel";
+        mortgageLabel.style.height = "50px";
+        mortgageLabel.style.width = "240px";
+        mortgageLabel.style.position = "absolute";
+        mortgageLabel.style.left = "0px";
+        mortgageLabel.style.top = "0px";
+        mortgageLabel.style.backgroundColor = "black";
+        mortgageLabel.innerHTML = "MORTGAGE PROPERTY";
+        mortgageLabel.style.textAlign = "center";
+        mortgageLabel.style.color = "white";
+        mortgageLabel.style.verticalAlign = "middle";
+        mortgageLabel.style.lineHeight = "50px";
+        document.getElementById("mortgageHolder").appendChild(mortgageLabel);
 
         var cancelBuildButton = document.createElement("button");
         cancelBuildButton.id = "cancelMortgage";
@@ -1849,27 +3151,103 @@ function playerCollect(amount){
         cancelBuildButton.style.backgroundSize = "11px 11px";
         cancelBuildButton.style.borderRadius = "5px";
         cancelBuildButton.style.position = "absolute";
-        cancelBuildButton.style.left = "5%";
-        cancelBuildButton.style.top = "35%";
+        cancelBuildButton.style.left = "50px";
+        cancelBuildButton.style.top = "250px";
         document.getElementById("body").appendChild(cancelBuildButton);
         cancelBuildButton.addEventListener("click", resetMortgageableProperties, false);
 
-        for(var i = 0; i < qualifiedTiles.length; i++) {
+        if(qualifiedTiles.length == 0) {
+            //Just show that there are no mortgagable properties 
             var propertyButton = document.createElement("button");
             propertyButton.id = qualifiedTiles[i];
-            propertyButton.innerHTML = properties[qualifiedTiles[i]].name.toUpperCase();
-            propertyButton.style.top = (5 + ((40 * i) + (5 * i))).toString().concat("px");;
+            propertyButton.innerHTML = "NO PROPERTIES AVAILABLE";
+            propertyButton.style.top = "55px";
             propertyButton.style.left = "10px";
             propertyButton.style.width = "220px";
             propertyButton.style.height = "40px";
             propertyButton.style.position = "absolute";
             propertyButton.style.borderRadius = "10px";
-            propertyButton.style.backgroundColor = "#0099ff";
+            propertyButton.style.backgroundColor = "#c2c2a3";
             propertyButton.style.borderColor = "black";
-            propertyButton.style.fontSize = "20px";
+            propertyButton.style.fontSize = "16px";
             propertyButton.style.fontFamily = "bold";
             document.getElementById("mortgageHolder").appendChild(propertyButton);
-            propertyButton.addEventListener("click", mortgage.bind(null, players[turn], propertyButton.id), false);
+        } else {
+            for(var i = 0; i < qualifiedTiles.length; i++) {
+                //Otherwise add al of them to the GUI
+                var propertyButton = document.createElement("button");
+                propertyButton.id = qualifiedTiles[i];
+                propertyButton.innerHTML = properties[qualifiedTiles[i]].name.toUpperCase();
+                propertyButton.style.top = (55 + ((40 * i) + (5 * i))).toString().concat("px");;
+                propertyButton.style.left = "10px";
+                propertyButton.style.width = "220px";
+                propertyButton.style.height = "40px";
+                propertyButton.style.position = "absolute";
+                propertyButton.style.borderRadius = "10px";
+                propertyButton.style.backgroundColor = "#0099ff";
+                propertyButton.style.borderColor = "black";
+                propertyButton.style.fontSize = "20px";
+                propertyButton.style.fontFamily = "bold";
+                document.getElementById("mortgageHolder").appendChild(propertyButton);
+                propertyButton.addEventListener("click", mortgage.bind(null, players[turn], propertyButton.id), false);
+            }
+        }
+        
+        //Doing the same for the already mortgaged properties
+        if(mortgagedProperties.length > 0) {
+            var mortgagedPropertiesHolder = document.createElement("div");
+            mortgagedPropertiesHolder.id = "mortgagedPropertiesHolder";
+            mortgagedPropertiesHolder.style.position = "absolute";
+            mortgagedPropertiesHolder.style.height = "155px";
+            mortgagedPropertiesHolder.style.width = "240px";
+            if(mortgagedProperties.length > 1) {
+                if(mortgagedProperties.length > 2) {
+                    mortgagedPropertiesHolder.style.overflowX = "hidden";
+                    mortgagedPropertiesHolder.style.overflowY = "scroll";
+                    mortgagedPropertiesHolder.style.width = "250px";
+                }
+            } else {
+                mortgagedPropertiesHolder.style.height = "100px";
+            }
+            mortgagedPropertiesHolder.style.top = (250 + parseInt((document.getElementById("mortgageHolder").style.height).substring(0, 3)) + 20 + qualifiedTiles.length).toString().concat("px");
+            mortgagedPropertiesHolder.style.left = "50px";
+            mortgagedPropertiesHolder.style.border = "5px solid black";
+            mortgagedPropertiesHolder.style.borderRadius = "10px";
+            mortgagedPropertiesHolder.style.backgroundColor = "#00001a";
+            document.getElementById("body").appendChild(mortgagedPropertiesHolder);
+
+            var mortgagePropertiesLabel = document.createElement("label");
+            mortgagePropertiesLabel.id = "mortgagePropertiesLabel";
+            mortgagePropertiesLabel.style.height = "50px";
+            mortgagePropertiesLabel.style.width = "240px";
+            mortgagePropertiesLabel.style.position = "absolute";
+            mortgagePropertiesLabel.style.left = "0px";
+            mortgagePropertiesLabel.style.top = "0px";
+            mortgagePropertiesLabel.style.backgroundColor = "black";
+            mortgagePropertiesLabel.innerHTML = "BUY BACK PROPERTY";
+            mortgagePropertiesLabel.style.textAlign = "center";
+            mortgagePropertiesLabel.style.color = "white";
+            mortgagePropertiesLabel.style.verticalAlign = "middle";
+            mortgagePropertiesLabel.style.lineHeight = "50px";
+            document.getElementById("mortgagedPropertiesHolder").appendChild(mortgagePropertiesLabel);
+
+            for(var i = 0; i < mortgagedProperties.length; i++) {
+                var propertyButton = document.createElement("button");
+                propertyButton.id = mortgagedProperties[i];
+                propertyButton.innerHTML = properties[mortgagedProperties[i]].name.toUpperCase();
+                propertyButton.style.top = (55 + ((40 * i) + (5 * i))).toString().concat("px");;
+                propertyButton.style.left = "10px";
+                propertyButton.style.width = "220px";
+                propertyButton.style.height = "40px";
+                propertyButton.style.position = "absolute";
+                propertyButton.style.borderRadius = "10px";
+                propertyButton.style.backgroundColor = "#0099ff";
+                propertyButton.style.borderColor = "black";
+                propertyButton.style.fontSize = "20px";
+                propertyButton.style.fontFamily = "bold";
+                document.getElementById("mortgagedPropertiesHolder").appendChild(propertyButton);
+                propertyButton.addEventListener("click", sellBack.bind(null, players[turn], propertyButton.id), false);
+            }
         }
     }
 
@@ -1879,19 +3257,39 @@ function playerCollect(amount){
     }
 
     function clearMortgageGUI() {
+        //Just clears the mortgage GUI
         var mortgageHolder = document.getElementById("mortgageHolder");
         mortgageHolder.parentNode.removeChild(mortgageHolder);
-        var cancelButton = document.getElementById("cancelMortgage");
-        cancelButton.parentNode.removeChild(cancelButton);
+        var cancel = document.getElementById("cancelMortgage");
+        cancel.parentElement.removeChild(cancel);
+        if(document.getElementById("mortgagedPropertiesHolder")) {
+            var mortgaged = document.getElementById("mortgagedPropertiesHolder");
+            mortgaged.parentNode.removeChild(mortgaged);
+        }
         qualifiedTiles = [];
     }
 
+    function sellBack(playerObj, tileID) {
+        //This function allows the player to buy back their property from the bank
+        var cost = properties[tileID].price * 1.1;
+
+        if(playerObj.money < cost) {
+            alert(playerObj.name + " cannot afford to buy this property back");
+        } else {
+            playerObj.money -= cost;
+            properties[tileID].mortgaged = false;
+        }
+        resetMortgageableProperties();
+    }
+
     function offerTradeClicked(tileID) {
+        //This is for that thing that comes up in the corner when hovering over a tile that is owned
         removeOwnerLabel();
         alert("Player wants to trade for " + tileID);
     }
 
     function removeOwnerLabel() {
+        //Removes the label that pops up
         var tile = document.getElementById("owner");
         tile.parentNode.removeChild(tile);
         var button = document.getElementById("offerTrade");
@@ -1901,6 +3299,7 @@ function playerCollect(amount){
     }
 
     function dropStatsDownOrUp() {
+        //This is the function that shows or hides the player's stats in the game
         if(document.getElementById("toggle").up) {
             var statsHolder = document.createElement("div");
             statsHolder.id = "statsHolder";
@@ -1956,6 +3355,7 @@ function playerCollect(amount){
             moneyLabel.style.borderRadius = "5px";
             document.getElementById("statsHolder").appendChild(moneyLabel);
 
+            //Deciding on what tile the player is on
             var positionLabel = document.createElement("label");
             var pos;
             positionLabel.id = "positionLabel";
@@ -2004,6 +3404,7 @@ function playerCollect(amount){
             jailCardLabel.style.borderRadius = "5px";
             document.getElementById("statsHolder").appendChild(jailCardLabel);
 
+            //Here is just show casing the properties the player owns
             var colourProps = [];
             var railProps = [];
             var utilProps = [];
@@ -2340,32 +3741,31 @@ function playerCollect(amount){
                 }
                 document.getElementById(cardType).style.height = heightNum + "px";
             } else {
-                var divRight = document.createElement("div");
+                /*var divRight = document.createElement("div");
                 divRight.id = "divRight";
                 divRight.style.position = "absolute";
                 divRight.style.right = "0";
                 divRight.style.height = "70px";
                 divRight.style.width = "70px";
-                divRight.style.top = "25%";
+                divRight.style.top = "25%";*/
                 var divLeft = document.createElement("div");
                 var textSize = Math.floor(card.Name.length / 19);
                 var topPercent = (45 - (textSize * 5)).toString().concat("%");
-                console.log(textSize + " " + topPercent);
                 divLeft.id = "divLeft";
                 divLeft.style.position = "absolute";
                 divLeft.style.width = "140px";
                 divLeft.style.top = topPercent;
-                console.log(divLeft.style.top);
+                divLeft.style.left = "10px";
                 divLeft.style.textAlign = "center";
                 divLeft.innerHTML = card.Name;
-                var pic = document.createElement("img");
+                /*var pic = document.createElement("img");
                 pic.id = "pic";
                 pic.src = "images/ship.png";
                 pic.style.width = "70px";
-                pic.style.height = "70px";
-                document.getElementById(cardType).appendChild(divRight);
+                pic.style.height = "70px";*/
+                //document.getElementById(cardType).appendChild(divRight);
                 document.getElementById(cardType).appendChild(divLeft);
-                document.getElementById("divRight").appendChild(pic);
+                //document.getElementById("divRight").appendChild(pic);
                 var okButton = document.createElement("button");
                 okButton.id = "ok";
                 okButton.innerHTML = "OK";
@@ -2383,12 +3783,12 @@ function playerCollect(amount){
         var moveDown = false;
         straightFadeOut = true;
 
-        var divRight = document.getElementById("divRight");
+        //var divRight = document.getElementById("divRight");
         var divLeft = document.getElementById("divLeft");
         var okButton = document.getElementById("ok");
         document.getElementById(cardType).removeChild(okButton);
         document.getElementById(cardType).removeChild(divLeft);
-        document.getElementById(cardType).removeChild(divRight);
+        //document.getElementById(cardType).removeChild(divRight);
 
         var intervalID = setInterval(function() {
             var height = document.getElementById(cardType).style.height;
@@ -2441,115 +3841,7 @@ function playerCollect(amount){
     }
     //End of chance animation stuff
 
-    /*
-    function bootPlacement() {
-        var node = document.createElement("img");
-        node.className = "player";
-        node.src = "images/boot.png";
-        node.alt = "boot";
-        //node.style.height = "25px";
-        //node.style.width ="25px";
-        players[turn].id = node;
-        document.getElementById("bootButt").disabled = true;
-        document.getElementById("bootButt").style.opacity = 0.4;
-        if(turn == numPlayers-1) {
-            turn = 0;
-            startGame();
-        } else {
-            turn++;
-        }
-    }
-
-    function carPlacement() {
-        var node = document.createElement("img");
-        node.className = "player";
-        node.src = "images/car.png";
-        node.alt = "car";
-        //node.style.height = "25px";
-        //node.style.width ="25px";
-        players[turn].id = node;
-        document.getElementById("carButt").disabled = true;
-        document.getElementById("carButt").style.opacity = 0.4;
-        if(turn == numPlayers-1) {
-            turn = 0;
-            startGame();
-        } else {
-            turn++;
-        }
-    }
-
-    function hatPlacement() {
-        var node = document.createElement("img");
-        node.className = "player";
-        node.src = "images/hat.png";
-        node.alt = "hat";
-        //node.style.height = "25px";
-        //node.style.width ="25px";
-        players[turn].id = node;
-        document.getElementById("hatButt").disabled = true;
-        document.getElementById("hatButt").style.opacity = 0.4;
-        if(turn == numPlayers-1) {
-            turn = 0;
-            startGame();
-        } else {
-            turn++;
-        }
-    }
-
-    function shipPlacement() {
-        var node = document.createElement("img");
-        node.className = "player";
-        node.src = "images/ship.png";
-        node.alt = "ship";
-        //node.style.height = "25px";
-        //node.style.width ="25px";
-        players[turn].id = node;
-        document.getElementById("shipButt").disabled = true;
-        document.getElementById("shipButt").style.opacity = 0.4;
-        if(turn == numPlayers-1) {
-            turn = 0;
-            startGame();
-        } else {
-            turn++;
-        }
-    }
-
-    function barrPlacement() {
-        var node = document.createElement("img");
-        node.className = "player";
-        node.src = "images/barrow.png";
-        node.alt = "barrow";
-        //node.style.height = "25px";
-        //node.style.width ="25px";
-        players[turn].id = node;
-        document.getElementById("barrButt").disabled = true;
-        document.getElementById("barrButt").style.opacity = 0.4;
-        if(turn == numPlayers-1) {
-            turn = 0;
-            startGame();
-        } else {
-            turn++;
-        }
-    }
-
-    function conePlacement() {
-        var node = document.createElement("img");
-        node.className = "player";
-        node.src = "images/cone.png";
-        node.alt = "cone";
-        node.style.height = "30px";
-        node.style.width ="25px";
-        players[turn].id = node;
-        document.getElementById("coneButt").disabled = true;
-        document.getElementById("coneButt").style.opacity = 0.4;
-        if(turn == numPlayers-1) {
-            turn = 0;
-            startGame();
-        } else {
-            turn++;
-        }
-    }*/
-
+    //This is all just the icon selection
     function canPlacement() {
         var node = document.createElement("img");
         node.className = "player";
@@ -2561,6 +3853,7 @@ function playerCollect(amount){
         players[turn].id = node;
         document.getElementById("can").setAttribute("disabled", "disabled");
         document.getElementById("can").style.opacity = 0.4;
+        console.log(turn);
         if(turn == numPlayers-1) {
             turn = 0;
             startGame();
@@ -2700,52 +3993,25 @@ function playerCollect(amount){
 
     
     function startGame() {
-        /*
-        var bootEle = document.getElementById("bootButt");
-        bootEle.parentNode.removeChild(bootEle);
-        var carEle = document.getElementById("carButt");
-        carEle.parentNode.removeChild(carEle);
-        var hatEle = document.getElementById("hatButt");
-        hatEle.parentNode.removeChild(hatEle);
-        var shipEle = document.getElementById("shipButt");
-        shipEle.parentNode.removeChild(shipEle);
-        var barrEle = document.getElementById("barrButt");
-        barrEle.parentNode.removeChild(barrEle);
-        var coneEle = document.getElementById("coneButt");
-        coneEle.parentNode.removeChild(coneEle);
-        */
-        /*
-        var canEle = document.getElementById("can");
-        canEle.parentNode.removeChild(canEle);
-        var burrEle = document.getElementById("burrito");
-        burrEle.parentNode.removeChild(burrEle);
-        var pastaEle = document.getElementById("pasta");
-        pastaEle.parentNode.removeChild(pastaEle);
-        var coffEle = document.getElementById("coff");
-        coffEle.parentNode.removeChild(coffEle);
-        var contEle = document.getElementById("contButt");
-        contEle.parentNode.removeChild(contEle);
-        var convEle = document.getElementById("convButt");
-        convEle.parentNode.removeChild(convEle);
-        var pizzaEle = document.getElementById("pizzaButt");
-        pizzaEle.parentNode.removeChild(pizzaEle);
-        var bagEle = document.getElementById("bagButt");
-        bagEle.parentNode.removeChild(bagEle);*/
         var iconHolder = document.getElementById("iconHolder");
         iconHolder.parentNode.removeChild(iconHolder);
         for(var i = 0; i < numPlayers; i++) {
             document.getElementById("0000").appendChild(players[i].id);
         }
         enableButton("rollDice");
+        enableButton("tradeButton");
+        //toggle is the toggle stats
         enableButton("toggle");
     }
 
     function enableButton(buttonID) {
+        //Enables the given button
         document.getElementById(buttonID).removeAttribute("disabled");
         document.getElementById(buttonID).style.backgroundColor = "#0099ff";
     }
 
     function disableButton(buttonID) {
+        //Disables teh given button
         document.getElementById(buttonID).setAttribute("disabled", "disabled");
         document.getElementById(buttonID).style.backgroundColor = "#c2c2a3";
     }
@@ -2776,51 +4042,40 @@ function playerCollect(amount){
     }
 
     function useJailCardClicked() {
+        //Player has used their jail card while in jail
         players[turn].jail.getOutOfJail--;
-        //document.getElementById("goojf").style.visibility = "hidden"; //...change goojf
-        //Have to put jail card back and shuffle as well
-        //alert("Player used their Get Out Of Jail Free card");
         releaseFromJail();
         removeJailGUI();
         normalRoll();
     }
 
     function payFineClicked() {
-        //document.getElementById("goojfNo").style.visibility = "hidden";
-        //Must take away from capital
-        //alert("Player payed the fine of 50");
+        //Player chose to pay the fine to get out of jail
         releaseFromJail();
         removeJailGUI();
         normalRoll();
     }
 
     function attemptDoubleClicked() {
-        //document.getElementById("goojfNo").style.visibility = "hidden";
+        //Player is attempting to roll a doubleto get out of jail
         var doubleAttempt = rollDice();
+        //rolledDouble will be set to tru in tollDice() if they roll a double
         if(rolledDouble) {
-            //alert("Player rolled a double");
             currentRoll = doubleAttempt[0] + doubleAttempt[1];
             releaseFromJail();
             removeJailGUI();
             diceRolled();
         } else {
-            //await sleep(500);
-            //diceFadeOut();
-            //alert("Player did not roll a double");
             removeJailGUI();
             decideOnNextPlayer();
         }
     }
 
     function buyPropertyClicked() {
-        //document.getElementById("buyOrAuction").style.visibility = "hidden";
+        //Player has clicked buy on the tile they landed on
         buy(players[turn], players[turn].position, properties[players[turn].position].price);
         endTurnAllowed = true;
         decideOnNextPlayer();
-        //document.getElementById("endTurn").removeAttribute("disabled");
-        //decidingOnProperty = false;
-        //document.getElementById("temp").disabled = false;
-        //incrementTurn();
     }
 
     async function setUpAuctionGUI() {
@@ -2831,6 +4086,7 @@ function playerCollect(amount){
         hammerSound.currentTime = 0;
         hammerSound.pause();
 
+        //This is just setting up the auction GUI
         var outerAuction = document.createElement("div");
         outerAuction.id = "outerAuction";
         outerAuction.style.position = "absolute";
@@ -2855,6 +4111,7 @@ function playerCollect(amount){
         innerAuction.style.backgroundColor = "#00001a";
         document.getElementById("body").appendChild(innerAuction);
 
+        //This holds the most recent bid
         var bidLabel = document.createElement("label");
         bidLabel.id = "bidLabel";
         bidLabel.innerHTML = "CURRENT BID:<br>".concat(properties[players[turn].position].price * 0.2);
@@ -2871,6 +4128,7 @@ function playerCollect(amount){
         bidLabel.style.textAlign = "center";
         document.getElementById("innerAuction").appendChild(bidLabel);
 
+        //This holds the most recent bidder
         var bidderLabel = document.createElement("label");
         bidderLabel.id = "bidderLabel";
         bidderLabel.innerHTML = "CURRENT BIDDER:<br>";
@@ -2951,6 +4209,7 @@ function playerCollect(amount){
         document.getElementById("innerAuction").appendChild(withdrawButton);
         withdraw.addEventListener("click", withdrawClicked, false);
 
+        //This holds the person that is currenlty deciding what to bid or to withdraw
         var playerBiddingLabel = document.createElement("label");
         playerBiddingLabel.id = "playerBiddingLabel";
         var turnPlusOne;
@@ -2976,6 +4235,7 @@ function playerCollect(amount){
         playerBiddingLabel.style.textAlign = "center";
         document.getElementById("outerAuction").appendChild(playerBiddingLabel);
 
+        //This holds the position that is getting auctioned
         var positionLabel = document.createElement("label");
         positionLabel.id = "playerBiddingLabel";
         positionLabel.innerHTML = properties[players[turn].position].name;
@@ -2997,12 +4257,12 @@ function playerCollect(amount){
         auctionPropertyClicked();
     }
 
-    async function auctionPropertyClicked() {
+    function auctionPropertyClicked() {
         //Must get rid of stats gui if up
         if(!document.getElementById("toggle").up) {
             removeStatsGUI();
         }
-        //Wipe the dictionary in case any palyers hvae been eliminated from the game
+        //Wipe the dictionary in case any players have been eliminated from the game
         //The first element of currentAuction is the number of players left
         //The second element is the tile to be auctioned
         auctionStarter = players[turn];
@@ -3012,6 +4272,7 @@ function playerCollect(amount){
         } else {
             turn++
         }
+        //Have ot offset the currentBidder by 2 to match up after the first two elements
         currentBidder = turn+2;
         currentBid = properties[auctionStarter.position].price * 0.2; //Starting bid is 10% of price
         for(var b = 0; b < players.length; b++) {
@@ -3026,10 +4287,7 @@ function playerCollect(amount){
                 currentAuction.push({player: tempPlayer, stillIn: false});
             }
         }
-
-        //Must be +2 to line up with the currentAuction list (cause the first two elements are 
-        //taken)
-        //Hiding and showing all appropriate GUIs
+        
         checkAuctionAtStart();
     }
 
@@ -3188,9 +4446,11 @@ function playerCollect(amount){
     }
 
     function decideOnNextPlayer() {
+        //This function is used to determine whether the endTurn button should be enabled
+        //It'll be enabled if the player didn't roll a double and they aren't deciding on a 
+        //property or doing anything that would hold the game up
         if(endTurnAllowed && !currentlyBankrupting) {
             if(!rolledDouble) {
-                console.log("herelol");
                 enableButton("endTurn")
             } else {
                 playerRolledDouble();
@@ -3199,6 +4459,8 @@ function playerCollect(amount){
     }
 
     async function moveBackwards(playerObj, spacesToMove) {
+        //This function is used with the chance cards that move the player backwards
+        //It's pretty much the same as the movePlayer function except for the while loop
         var newPosition;
         //Gets first two numbers in the id
         var left = parseInt(playerObj.position.substring(0, 2));
@@ -3221,45 +4483,30 @@ function playerCollect(amount){
         }
         playerObj.position = newPosition;
         checkTile(newPosition);
-        //decidingOnProperty = false;
-        //document.getElementById("temp").disabled = false;
-        //incrementTurn();
     }
 
     function checkTile(playerPos) {
-        //decidingOnProperty = true;
-        //walkSound.pause();
-        //console.log(playerPos);
-        //alert("Player position: " + playerPos);
         if(playerPos == "0010" || playerPos == "0000") {
             decideOnNextPlayer();
             //This is the jail tile, do nothing
         } else if(playerPos == "0007" || playerPos == "1008" || playerPos == "0400") {
             //Player has landed on chance card
-            //console.log("Draw chance card");
-            //decidingOnProperty = true;
-            //alert("Draw chance card");
             getChanceCard();
         } else if(playerPos == "0002" || playerPos == "0710" || playerPos == "0700") {
             //Player has landed on community chess
-            //console.log("Draw community chest card");
-            //alert("Draw community chest card");
             getCommChestCard();
         } else if(playerPos == "1010") {
             //Player has landed on Free Parking
-            //console.log("Free Parking");
             landedOnKitty(players[turn]);
         } else if(playerPos == "1000") {
             //Player is sent to jail
-            //console.log("Player is sent to jail");
-            //alert("player is sent to jail");
             placeInJail();
             //decideOnNextPlayer();
         } else if(playerPos == "0004" || playerPos == "0200") {
-            //console.log("Player pays a tax");
+            //Player landed on a tax tile
             playerFined(players[turn], playerPos);
-            //decideOnNextPlayer();
         } else { 
+            //Player landed on a tile that can be owned
             isOwned(players[turn], playerPos);
         }
     }
@@ -3270,23 +4517,19 @@ function playerCollect(amount){
     }
 
     function isOwned(playerObj, tileID) {
+        //This stops the endTurn button being enabled in decideOnNextPlayer()
         endTurnAllowed = false;
-        //Checking if the tile landed on play 'playr' is owned or naw
+        //Checking if the tile landed on by player is owned or naw
         if(properties[tileID].owner == null) {
-            //decidingOnProperty = true;
-            //Buy or Auction GUI visible
-            //await sleep(1200); //Have to wait so the dice fade out and don't break the game
-            //document.getElementById("buyOrAuction").style.visibility = "visible";
+            //The player has landed on a tile they can purchase
             enableButton("buy");
             enableButton("auction");
         } else {
-            if(properties[tileID].owner != players[turn]) { //Took out .id here on both
+            if(properties[tileID].owner != players[turn]) {
                 payRent(playerObj, properties[tileID].owner, tileID);
             }
             endTurnAllowed = true;
             decideOnNextPlayer();
-            //document.getElementById("endTurn").removeAttribute("disabled");
-            //endTurnAllowed = true;
         }
     }
 
@@ -3298,33 +4541,41 @@ function playerCollect(amount){
 
         disableButton("buy");
         disableButton("auction");
-        playerObj.money -= amount;//properties[tileID].price; //;;;Will be done properly by Donn
-        properties[tileID].owner = playerObj;//players.indexOf(playerObj);
-        playerObj.assets.push(tileID);
-        //playerObj.colours[properties[tileID].colour]++; //changed
-        //playerObj.properties[properties[tileID].colour].push(tileID);
-        if(properties[tileID].type == "colour") {
-            //playerObj.ownedTilesByColour[properties[tileID].colour].push(tileID); //changed
-            playerObj.properties[properties[tileID].colour].push(tileID);
-        } else if(properties[tileID].type == "railroad") {
-            //playerObj.railroadsOwned++; //changed
-            playerObj.properties["railroad"].push(tileID);
-        } else if(properties[tileID].type == "utility") {
-            //playerObj.utilitiesOwned++; //changed
-            playerObj.properties["utilities"].push(tileID);
-        }
-        buySound.play();
-        await sleep(750);
-        buySound.currentTime = 0;
-        buySound.pause();
-        //alert(playerObj.name + " bought " + tileID + " for " + amount + ". Player's capital is " + playerObj.money);
-        console.log(currentlyBankrupting);
-        if(!currentlyBankrupting) {
-            enableBuildButton();
+        playerObj.money -= amount;
+        if(playerObj.money <= 0) {
+            bankrupt(playerObj);
+        } else {
+            //Setting the owner in the properties dictionary
+            properties[tileID].owner = playerObj;
+            //Adding the property to the player's assets list
+            playerObj.assets.push(tileID);
+            //Also adding it to the appropriate list in player.properties
+            if(properties[tileID].type == "colour") {
+                playerObj.properties[properties[tileID].colour].push(tileID);
+            } else if(properties[tileID].type == "railroad") {
+                playerObj.properties["railroad"].push(tileID);
+            } else if(properties[tileID].type == "utility") {
+                playerObj.properties["utilities"].push(tileID);
+            }
+            buySound.play();
+            await sleep(750);
+            buySound.currentTime = 0;
+            buySound.pause();
+            if(!currentlyBankrupting) {
+                //If this were true then the property was bought in the bankruptcy auction so there
+                //may still be some properties left
+                enableBuildButton();
+            }
         }
     }
 
     function checkAuctionAtStart() {
+        /*
+        * This checks to make sure there is more than one player in the auction. It takes note of the
+        * currentBidder, then it finds the next one with findBidder() and compares the two. If they 
+        * are the same person then there's no auction
+        */
+
         var holder = currentBidder;
         findBidder();
         var tempA = currentBidder;
@@ -3344,11 +4595,10 @@ function playerCollect(amount){
     }
 
     function auctionChecker() {
-        console.log(currentBidder);
-        //This checks criteria for the auction, such as if the curretnt bidder has enough capital
+        //This checks criteria for the auction, such as if the current bidder has enough capital
         //or if there are still enough people in the auction
         if(currentAuction[0] > 1) {
-            //Checking capital
+            //The first element of currentAuction is how many people are still in the auction
             if(currentAuction[currentBidder].player.money < currentBid) {
                 withdrawFromAuction();
                 auctionChecker();
@@ -3359,11 +4609,13 @@ function playerCollect(amount){
     }
 
     function endAuction() {
+        //This clears away the GUI and gives the property to the winner of the auction
         var outerAuction = document.getElementById("outerAuction");
         var innerAuction = document.getElementById("innerAuction");
         outerAuction.parentNode.removeChild(outerAuction);
         innerAuction.parentNode.removeChild(innerAuction);
         if(!currentlyBankrupting) {
+            //This means it's a regular old auction and you can just give the player the property
             if(currentBid == properties[auctionStarter.position].price * 0.2) {
                 console.log("nobody wanted the property");
             } else {
@@ -3371,12 +4623,16 @@ function playerCollect(amount){
             }
         }
         if(currentlyBankrupting) {
+            //This means that there is a player being bankrupt so you need to check if there's
+            //more properties to be auctioned
             buy(currentAuction[currentBidder].player, currentAuction[1], currentBid);
-            properties[currentAuction[1]].mortgaged = false;
+            justTraded(currentAuction[currentBidder].player, currentAuction[1]);
             numberOfAuctions--;
             bankruptcyAuction(bankruptingPlayer);
         } else {
+            //Otherwise you can just carry on with the game
             endTurnAllowed = true;
+            //This just returns turn to its value before the auction
             turn = players.indexOf(auctionStarter);
             decideOnNextPlayer();
             enableButton("endTurn");
@@ -3384,6 +4640,8 @@ function playerCollect(amount){
     }
 
     function findBidder() {
+        //This finds the next bidder in the auction by going through the currentAuction list (starting
+        //from point 2) and checking the stillIn part of the dictionary at that index
         var numAuctioneers = currentAuction.length - 2;
         //Have to get to the next bidder straight away so it doesn't just stay as the current one
         if(currentBidder < currentAuction.length-1) {
@@ -3406,7 +4664,24 @@ function playerCollect(amount){
             }
             numAuctioneers--;
         }
-        //document.getElementById("playerBiddingLabel").innerHTML = players[currentBidder-1].name;
+
+        if(currentAuction[currentBidder].player.money < currentBid + 100) {
+            document.getElementById("bidHundred").setAttribute("disabled", "disabled");
+        } else {
+            document.getElementById("bidHundred").removeAttribute("disabled");
+        }
+
+        if(currentAuction[currentBidder].player.money < currentBid + 10) {
+            document.getElementById("bidTen").setAttribute("disabled", "disabled");
+        } else {
+            document.getElementById("bidTen").removeAttribute("disabled");
+        }
+
+        if(currentAuction[currentBidder].player.money < currentBid + 1) {
+            document.getElementById("bidOne").setAttribute("disabled", "disabled");
+        } else {
+            document.getElementById("bidOne").removeAttribute("disabled");
+        }
     }
 
     function withdrawFromAuction() {
@@ -3418,7 +4693,13 @@ function playerCollect(amount){
     }
 
     function auction(buttonPressed){
-        //The button can be them bidding 1, 10, or 100, or them withdrawing
+        //buttonPressed can have 4 values:
+        //{
+        //1 -> The player bid 1
+        //10 -> The player bid 10
+        //100 -> The player bid 100
+        //0 -> The player withdrew
+        //}
         if(buttonPressed > 0) {
             //Need to error check here for capital
             currentBid += buttonPressed;
@@ -3483,12 +4764,14 @@ function playerCollect(amount){
             releaseFromJail();
             //Must add logic to check if player has enough capital
             players[turn].money -= payOut;
-            diceRollInJail = rollDice();
-            rolledDouble = false; //Just in case they roll a double after 3 turns
-            currentRoll = diceRollInJail[0] + diceRollInJail[1];
-            //console.log("Player pays the toll (50)");
-            //alert("Player pays the toll of 50");
-            diceRolled();
+            if(players[turn].money <= 0) {
+                bankrupt(players[turn]);
+            } else {
+                diceRollInJail = rollDice();
+                rolledDouble = false; //Just in case they roll a double after 3 turns
+                currentRoll = diceRollInJail[0] + diceRollInJail[1];
+                diceRolled();
+            }
         } else {
             //The Pay Fine or Attempt to Roll Double GUI will pop if the player hasn't been in
             //jail for 3 turns and have the option to either pay the fine to get out straight away
@@ -3661,6 +4944,7 @@ function playerCollect(amount){
 
     function placeHouse(tileID, numberToBuild = 1) {
         //Places houses, not hotels
+        //tileA is the little div above the tile where houses go
         var tileA = tileID.concat("a");
         for(var i = 0; i < numberToBuild; i++) {
             properties[tileID].numberOfHouses++;
@@ -3677,7 +4961,9 @@ function playerCollect(amount){
 
     function placeHotel(tileID) {
         //Place hotels, not houses
+        //tileA is the little div above the tile where houses go
         var tileA = tileID.concat("a");
+        //You must first remove the 4 houses already on the tile
         unPlaceHouse(tileID, 4);
         setTimeout(function() {
             var tileA = tileID.concat("a");
@@ -3695,6 +4981,7 @@ function playerCollect(amount){
     }
 
     function buildHouse(houseID) {
+        //This fades the house image in
         var intervalID = setInterval(function() {
             var currentOpacity = parseFloat(document.getElementById(houseID).style.opacity);
             if(currentOpacity < 1.0) {
@@ -3708,12 +4995,14 @@ function playerCollect(amount){
 
     function unPlaceHouse(tileID, numberToRemove = 1) {
         //If number to remove is 5, the property is being mortgaged and it currently has a hotel
+        //This means all the properties are gonna be removed so you just remove them all in one
         var tileA = tileID.concat("a");
         if(numberToRemove == 5) {
             var tileAID = tileA.concat(properties[tileID].numberOfHouses.toString());
             removeHouse(tileAID);
             properties[tileID].numberOfHouses = 0;
         } else {
+            //Otherwise you remove the specified number
             for(var i = 0; i < numberToRemove; i++) {
                 var tileAID = tileA.concat(properties[tileID].numberOfHouses.toString());
                 properties[tileID].numberOfHouses--;
@@ -3729,6 +5018,7 @@ function playerCollect(amount){
     }
 
     function removeHouse(houseID) {
+        //This fades the house out
         var intervalID = setInterval(function() {
             var currentOpacity = parseFloat(document.getElementById(houseID).style.opacity);
             if(currentOpacity > 0.0) {
@@ -3743,13 +5033,21 @@ function playerCollect(amount){
     }
 
     function showQualifiedProperties() {
+        /*
+        * This returns the houses can can currently be built on. A house can be built on if there
+        * are no mortgaged houses in the colour set, you have all houses in the colour set, and, by
+        * building a house on a property, you don't create a house gap of more than one with any
+        * other property in the colour set
+        */
         disableButton("buildHouse");
         for(var i = 0; i < players[turn].assets.length; i++) {
+            //This runs through each of the players assets and checks what i described up there
             if(properties[players[turn].assets[i]].type == "colour" && properties[players[turn].assets[i]].numberOfHouses < 5 && checkColourSetComplete(players[turn], players[turn].assets[i]) && checkForNoMortgageInSet(players[turn], players[turn].assets[i]) && checkNumHousesInSet(players[turn], players[turn].assets[i])) {
                 qualifiedTiles.push(players[turn].assets[i]);
             }
         }
 
+        //This creates the GUI telling you which properties can be improved
         var buildHolder = document.createElement("div");
         buildHolder.id = "buildHolder";
         buildHolder.style.position = "absolute";
@@ -3776,9 +5074,7 @@ function playerCollect(amount){
         cancelBuildButton.style.height = "15px";
         cancelBuildButton.style.backgroundImage = "url('images/cancel.png')";
         cancelBuildButton.style.backgroundSize = "11px 11px";
-        //cancelBuildButton.style.backgroundColor = "#e60000";
         cancelBuildButton.style.borderRadius = "5px";
-        //cancelBuildButton.style.borderColor = "#e60000";
         cancelBuildButton.style.position = "absolute";
         cancelBuildButton.style.left = "5%";
         cancelBuildButton.style.top = "35%";
@@ -3786,6 +5082,7 @@ function playerCollect(amount){
         cancelBuildButton.addEventListener("click", resetQualifiedProperties, false);
 
         for(var i = 0; i < qualifiedTiles.length; i++) {
+            //This puts the properties in the GUI
             var propertyButton = document.createElement("button");
             propertyButton.id = qualifiedTiles[i];
             propertyButton.innerHTML = properties[qualifiedTiles[i]].name.toUpperCase();
@@ -3805,19 +5102,34 @@ function playerCollect(amount){
     }
 
     function enableBuildButton() {
+        //This runs through the hosues to check if at least one can be either build on or mortgaged
+        //and activated teh necessary buttons (build/mortgage). It also 
         disableButton("buildHouse");
         disableButton("showMortgageButton")
+        //disableButton("tradeButton");
         for(var i = 0; i < players[turn].assets.length; i++) {
             if(properties[players[turn].assets[i]].type == "colour" && properties[players[turn].assets[i]].numberOfHouses < 5 && checkColourSetComplete(players[turn], players[turn].assets[i]) && checkForNoMortgageInSet(players[turn], players[turn].assets[i]) && checkNumHousesInSet(players[turn], players[turn].assets[i])) {
-                enableButton("buildHouse");
-                break;
+                if(players[turn].money >= properties[players[turn].assets[i]].costOfHouse) {
+                    enableButton("buildHouse");
+                    break;
+                }
             }
         }
         
         for(var i = 0; i < players[turn].assets.length; i++) {
-            if(!properties[players[turn].assets[i]].mortgaged) {
-                enableButton("showMortgageButton");
-                break;
+            enableButton("showMortgageButton");
+            break;
+        }
+    
+        if(players[turn].assets > 0 || players[turn].getOutOfJail > 0 || players[turn].money > 0) {
+            //Think we already have something to check if trade should be activated 
+            for(var i = 0; i < numPlayers; i++) {
+                if(i != turn) {
+                    if(players[i].assets > 0 || players[i].getOutOfJail > 0) {
+                        enableButton("tradeButton");
+                        break
+                    }
+                }
             }
         }
     }
@@ -3862,6 +5174,7 @@ function playerCollect(amount){
     }
 
     function checkIfPropMortgaged(tileID) {
+        //Checks if a single property is mortgaged
         return properties[tileID].mortgaged;
     }
 
@@ -3884,7 +5197,25 @@ function playerCollect(amount){
         return true;
     }
 
+    function checkIfAbleToRemoveHouse(playerObj, tileID) {
+        //This checks that if by removing a house you create a house gap of more than one
+        var propColour = properties[tileID].colour;
+
+        for(var i = 0; i < playerObj.properties[propColour].length; i++) {
+            if(playerObj.properties[propColour][i] == tileID) {
+                continue;
+            } else {
+                if(properties[tileID].numberOfHouses < properties[playerObj.properties[propColour][i]].numberOfHouses) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     function payRent(payer, payee, tileID) {
+        //When a player lands on an owned tile this will be called to calculate the rent. If the 
+        //property is mortgaged, norent will be paid
         var capitalAvailable = payer.money;
         var rentDue;
         if(properties[tileID].mortgaged) {
@@ -3915,25 +5246,24 @@ function playerCollect(amount){
 
             if(rentDue > capitalAvailable) {
                 //console.log("Allow to mortgage or bankrupt");
-                deficitAmount = rentDue;
+                //deficitAmount = rentDue;
                 iDeclareBankruptcy(players[turn]);
             } else {
                 //This is where transactions come into play
                 payer.money -= rentDue;
                 payee.money += rentDue;
-                //console.log("Rent: " + rentDue);
-                //alert(rentDue + " was paid in rent to " + payee.name);
-                //Add to owners account
+                if(payer.money <= 0) {
+                    bankrupt(payer);
+                }
             }
         }
     }
 
     function playerFined(playerObj, playerPos) {
+        //This just adds to the kitty
         if(playerPos == "0004") {
-            //alert("player pays 200");
             kitty += 200;
         } else {
-            //alert("player pays 75 for noise complaint");
             kitty += 75;
         }
         document.getElementById("kitty").innerHTML = kitty;
@@ -3941,26 +5271,35 @@ function playerCollect(amount){
     }
 
     function landedOnKitty(playerObj) {
-        //alert(playerObj.money);
-        //alert("Player receives " + kitty + " for landing on Free Parking");
+        //The player is given all the money in the kitty
         playerObj.money += kitty;
         kitty = 0;
         document.getElementById("kitty").innerHTML = kitty;
-        //alert(playerObj.money);
         decideOnNextPlayer();
     }
 
     function mortgage(playerObj, tileID) {
+        //Allow the player to mortgage their property to the bank. 
+        var bankruptCheck = false;
+
+        //This just checks if they are mortgaging from bankrupt and they need to be checked again
+        if(playerObj.money <= 0) {
+            bankruptCheck = true;
+            removeBankruptGUI();
+        }
         //Calculate the loan amount
         var loan = properties[tileID].price / 2;
         console.log("loan: " + loan);
 
+        //If the property has houses on it, all the properties of that colour need to remove their
+        //houses and sold back to the bank
         if(properties[tileID].type == "colour") {
             var propertyColour = properties[tileID].colour;
+            //This checks whether the colour set is all unimproved
             var allUnimproved = checkIfAllPropertiesUnimproved(playerObj.properties[propertyColour]);
-            console.log(allUnimproved);
     
             if(!allUnimproved) {
+                //If not you have to go through each property in the set and remove houses where necessary
                 for(var i = 0; i < playerObj.properties[propertyColour].length; i++) {
                     var tile = playerObj.properties[propertyColour][i];
                     unPlaceHouse(tile, properties[tile].numberOfHouses);
@@ -3971,25 +5310,19 @@ function playerCollect(amount){
         
         playerObj.money += loan;
         properties[tileID].mortgaged = true;
-        console.log(playerObj.money);
-        console.log(properties[tileID].mortgaged);
 
         if(document.getElementById("mortgageHolder")) {
-            console.log("here");
+            //This resets it if it's a normal mortgage
             resetMortgageableProperties();
-        } else if(document.getElementById("mortgageHolderB")) {
-            removeBankruptMortgageGUI();
-            /*
-            var holder = document.getElementById("mortgageHolderB");
-            holder.parentNode.removeChild(holder);
-            var cancel = document.getElementById("cancelMortgage");
-            cancel.parentNode.removeChild(cancel);
-            qualifiedTiles = [];*/
-            //checkIfStillBankrupt(playerObj);
+        }
+
+        if(bankruptCheck) {
+            checkIfStillBankrupt(playerObj);
         }
     }
 
     function checkIfAllPropertiesUnimproved(propertyList) {
+        //This runs through a colour set to check if there are any houses
         for(var i = 0; i < propertyList.length; i++) {
             if(properties[propertyList[i]].numberOfHouses > 0) {
                 return false;
@@ -3998,31 +5331,28 @@ function playerCollect(amount){
         return true;
     }
 
-    /*
-    function transactions(userObj, fee) {
-        //Can use for both paying a player/taking money from a player
-        if(fee < 0) {
-            //Taking money from player
-            userObj.money += fee;
-            kitty -= fee
-        }else if(fee > 0) {
-            userObj.money += fee;
+    function justTraded(playerObj, tileID) {
+        /*
+        * After a player trades a property with another player, the property may be mortgaged. If 
+        * it is then the player who receives the card has the opportunity to pay off the loan to the
+        * bank. If they don't they have to pay the 10% anyway along with the full loan later on
+        */
+        if(properties[tileID].mortgaged) {
+            if(confirm("Would you like to unmortgage this property now?")) {
+                playerObj.money -= ((properties[tileID].price / 2) * 1.1);
+            } else {
+                alert("Player has to pay 10% of the loan anyway");
+                playerObj.money -= ((properties[tileID].price / 2) * 0.1);
+            }
+            if(playerObj.money <= 0) {
+                bankrupt(playerObj);
+            }
         }
     }
-    */
 
     function distanceCalculator(tileOne, tileTwo) {
         //Calculates the distance between two tiles
-        //var t1 = tileToPosition(tileOne);
-        //var t2 = tileToPosition(tileTwo);
         var distance = tileToPosition(tileOne) - tileToPosition(tileTwo);
-        //console.log(t1);
-        //console.log(t2);
-        /*if(t2 > t1) {
-            distance = (40 - t2) + t1;
-        } else {
-            distance = t1 - t2;
-        }*/
         if(distance < 0) {
             distance += 40;
         }
