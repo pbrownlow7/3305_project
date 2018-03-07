@@ -4,13 +4,25 @@
         <title>Monopoly Board</title>
         <link type="text/css" rel="stylesheet" href="board.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-        <script src="boardv2.js"></script>
+        <script src="board.js"></script>
     </head>
+    <!--<input id="dOne">
+    <input id="dTwo">-->
 
-    <body>
-      <div id="clock">
+    <body id="body">
+      <!--<div id="clock">
          <p></p>
-     </div>
+     </div>-->
+     <!--<div id="test">
+         <p id="test2">&#9856;</p>
+     </div>-->
+        <audio src="bounce.mp3" id="walkSound" class="sounds" preload="auto" controls="none"></audio>
+        <audio src="diceRoll.mp3" id="diceSound" class="sounds" preload="auto" controls="none"></audio>
+        <audio src="jailDoorClose.mp3" id="jailClose" class="sounds" preload="auto" controls="none"></audio>
+        <audio src="cha-ching.mp3" id="chaching" class="sounds" preload="auto" controls="none"></audio>
+        <audio src="hammer.mp3" id="hammerSound" class="sounds" preload="auto" controls="none"></audio>
+
+        <!--<p id="currTurn"></p>
 
         <div id="panel">
             <p id="bidder">Player 1</p>
@@ -53,7 +65,7 @@
 
             </div>
         </div>
-        <br>
+        <br>-->
         <div id="board">
             <table>
                 <tr>
@@ -229,9 +241,11 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td class="hor"><p id="dicePosition1"></p></td>
+                    <td class="hor">
+                        <p id="dicePosition1"><img src="" id="dice1" class="dice"></p>
+                    </td>
                     <td class="hor" id= "center">
-                        <p id= "dicePosition2"></p>
+                        <p id="dicePosition2"><img src="" id="dice2" class="dice"></p>
                     </td>
                     <td></td>
                     <td></td>
@@ -405,21 +419,45 @@
                     <td class="edge" id="0000">
 
                         <div id="0000a">
+                            <!--
                             <img class="player" src="images/boot.png" alt="Player1" id="player1">
                             <img class = "player" src="images/car.png" alt="Player2" id="player2">
                             <img class = "player" src="images/hat.png" alt="Player3" id="player3">
                             <img class = "player" src="images/ship.png" alt="Player4" id="player4">
+                            -->
                         </div>
                     </td>
                 </tr>
             </table>
         </div>
+<!--
+        <div id="iconChoices">
+            <!--
+            <button id="bootButt"></button>
+            <button id="carButt"></button>
+            <button id="hatButt"></button>
+            <button id="shipButt"></button>
+            <button id="barrButt"></button>
+            <button id="coneButt"></button>
+            --
+            <button id="canButt"></button>
+            <button id="burrButt"></button>
+            <button id="pastaButt"></button>
+            <button id="coffButt"></button>
+            <button id="contButt"></button>
+            <button id="convButt"></button>
+            <button id="pizzaButt"></button>
+            <button id="bagButt"></button>
+        </div>
 
-        <button id="temp" disable=false>
+        <button id="temp" disabled>
             Roll Dice
         </button>
+        <button id="endTurn" disabled>
+            End Turn
+        </button>-->
 
-        <!---
+        <!--
         <div id="auctionTimer">
           <p></p>
         </div>
