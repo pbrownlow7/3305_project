@@ -4926,6 +4926,7 @@ function playerCollect(amount){
         }
     }
 
+    //Functions for building houses start here
     function buildHouses(playerObj, tileID) {
         var costOfHouse = properties[tileID].houseValue;
         clearBuildGUI();
@@ -5109,7 +5110,7 @@ function playerCollect(amount){
         //disableButton("tradeButton");
         for(var i = 0; i < players[turn].assets.length; i++) {
             if(properties[players[turn].assets[i]].type == "colour" && properties[players[turn].assets[i]].numberOfHouses < 5 && checkColourSetComplete(players[turn], players[turn].assets[i]) && checkForNoMortgageInSet(players[turn], players[turn].assets[i]) && checkNumHousesInSet(players[turn], players[turn].assets[i])) {
-                if(players[turn].money >= properties[players[turn].assets[i]].costOfHouse) {
+                if(players[turn].money >= properties[players[turn].assets[i]].houseValue) {
                     enableButton("buildHouse");
                     break;
                 }
